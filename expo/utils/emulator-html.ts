@@ -38,8 +38,7 @@ export function getEmulatorHtml(base64: string, core: string): string {
 
     #game {
       width: 100%;
-      aspect-ratio: 3/2;
-      max-height: 100%;
+      height: 100%;
       position: relative;
       overflow: hidden;
       background: #000;
@@ -1746,7 +1745,20 @@ export function getEmulatorHtml(base64: string, core: string): string {
         if (_uiStyleAdded) return;
         _uiStyleAdded = true;
         var style = document.createElement('style');
-        style.textContent = '\n          .ejs--bar, .ejs_menu_bar, .ejs--controls, .ejs--virtual-gamepad,\n          .ejs_virtualGamepad_container, .ejs_game_touch_overlay,\n          [class*="ejs_virtualGamepad"], [class*="ejs--overlay"],\n          [class*="ejs_overlay"], [class*="touch-controls"],\n          [class*="ejs--bar"], [class*="ejs_menu"] {\n            display: none !important;\n            opacity: 0 !important;\n            pointer-events: none !important;\n            visibility: hidden !important;\n            width: 0 !important;\n            height: 0 !important;\n          }\n          #game > div > div:not(:first-child) {\n            display: none !important;\n          }\n          #game canvas, #game > div, #game > div > div, #game > div > div > div {\n            transform: none !important;\n            -webkit-transform: none !important;\n            transform-origin: center center !important;\n          }\n        ';
+        style.textContent = [
+          '.ejs--bar,.ejs_menu_bar,.ejs--controls,.ejs--virtual-gamepad,',
+          '.ejs_virtualGamepad_container,.ejs_game_touch_overlay,',
+          '[class*="ejs_virtualGamepad"],[class*="ejs--overlay"],',
+          '[class*="ejs_overlay"],[class*="touch-controls"],',
+          '[class*="ejs--bar"],[class*="ejs_menu"]{',
+          '  display:none!important;pointer-events:none!important;',
+          '  visibility:hidden!important;width:0!important;height:0!important}',
+          '#game>div>div:not(:first-child){display:none!important}',
+          '#game canvas,#game>div,#game>div>div,#game>div>div>div{',
+          '  transform:none!important;-webkit-transform:none!important;',
+          '  transform-origin:center center!important}',
+          '#game canvas{width:100%!important;height:100%!important;object-fit:contain!important}'
+        ].join('');
         document.head.appendChild(style);
       }
 
@@ -1805,79 +1817,60 @@ export function getEmulatorHtml(base64: string, core: string): string {
           cacheManager: false
         };
         window.EJS_VirtualGamepadSettings = false;
+        window.EJS_defaultOptions = { rotation: 0 };
         window.EJS_rotation = 0;
-        window.EJS_ROTATION = 0;
-        window.EJS_forceNoRotation = true;
 
-        // Aggressively block rotation by intercepting style.transform setter on game elements
+        // Lightweight anti-rotation: targeted MutationObserver + periodic fallback
         (function() {
-          var origSetProperty = CSSStyleDeclaration.prototype.setProperty;
-          CSSStyleDeclaration.prototype.setProperty = function(prop, value, priority) {
-            if ((prop === 'transform' || prop === '-webkit-transform') && value && typeof value === 'string' && value.indexOf('rotate') !== -1) {
-              console.log('[AntiRotate] Blocked setProperty rotate:', value);
-              return origSetProperty.call(this, prop, 'none', 'important');
-            }
-            return origSetProperty.call(this, prop, value, priority);
-          };
-
           var gameEl = document.getElementById('game');
-          function lockTransform(el) {
+          if (!gameEl) return;
+
+          function stripRotation(el) {
             if (!el || !el.style) return;
-            try {
-              Object.defineProperty(el.style, 'transform', {
-                get: function() { return 'none'; },
-                set: function(v) {
-                  if (v && typeof v === 'string' && v.indexOf('rotate') !== -1) {
-                    console.log('[AntiRotate] Blocked transform=', v);
-                    origSetProperty.call(el.style, 'transform', 'none', 'important');
-                  } else {
-                    origSetProperty.call(el.style, 'transform', v || 'none');
-                  }
-                },
-                configurable: true
-              });
-              Object.defineProperty(el.style, 'webkitTransform', {
-                get: function() { return 'none'; },
-                set: function(v) {
-                  if (v && typeof v === 'string' && v.indexOf('rotate') !== -1) {
-                    origSetProperty.call(el.style, '-webkit-transform', 'none', 'important');
-                  } else {
-                    origSetProperty.call(el.style, '-webkit-transform', v || 'none');
-                  }
-                },
-                configurable: true
-              });
-            } catch(e) { console.log('[AntiRotate] Lock error:', e); }
+            var style = el.getAttribute('style') || '';
+            if (style.indexOf('rotate') !== -1) {
+              el.style.setProperty('transform', 'none', 'important');
+              el.style.setProperty('-webkit-transform', 'none', 'important');
+            }
           }
 
-          if (gameEl) {
-            lockTransform(gameEl);
-            var obs = new MutationObserver(function(muts) {
-              for (var i = 0; i < muts.length; i++) {
-                var m = muts[i];
-                if (m.type === 'childList') {
-                  m.addedNodes.forEach(function(n) {
-                    if (n.nodeType === 1) {
-                      lockTransform(n);
-                      if (n.querySelectorAll) n.querySelectorAll('div, canvas').forEach(lockTransform);
-                    }
-                  });
-                }
-                if (m.type === 'attributes' && m.attributeName === 'style') {
-                  var t = m.target.getAttribute('style') || '';
-                  if (t.indexOf('rotate') !== -1) {
-                    origSetProperty.call(m.target.style, 'transform', 'none', 'important');
-                    origSetProperty.call(m.target.style, '-webkit-transform', 'none', 'important');
-                  }
-                }
-              }
-            });
-            obs.observe(gameEl, { attributes: true, attributeFilter: ['style'], childList: true, subtree: true });
+          function stripAll() {
+            stripRotation(gameEl);
+            var children = gameEl.querySelectorAll('div, canvas');
+            for (var i = 0; i < children.length; i++) stripRotation(children[i]);
           }
+
+          var obs = new MutationObserver(function(mutations) {
+            for (var i = 0; i < mutations.length; i++) {
+              var m = mutations[i];
+              if (m.type === 'attributes') stripRotation(m.target);
+              if (m.type === 'childList') {
+                m.addedNodes.forEach(function(n) {
+                  if (n.nodeType === 1) {
+                    stripRotation(n);
+                    if (n.querySelectorAll) {
+                      var subs = n.querySelectorAll('div, canvas');
+                      for (var j = 0; j < subs.length; j++) stripRotation(subs[j]);
+                    }
+                  }
+                });
+              }
+            }
+          });
+          obs.observe(gameEl, { attributes: true, attributeFilter: ['style'], childList: true, subtree: true });
+
+          setInterval(stripAll, 500);
         })();
 
         window.EJS_onGameStart = function() {
           console.log('[EmuHTML] EJS_onGameStart callback');
+          try {
+            var emu = window.EJS_emulator;
+            if (emu) {
+              if (typeof emu.setRotation === 'function') emu.setRotation(0);
+              if (emu.gameManager && typeof emu.gameManager.setRotation === 'function') emu.gameManager.setRotation(0);
+            }
+          } catch(e) { console.log('[EmuHTML] Rotation API error:', e); }
           dismissOverlay();
         };
 
