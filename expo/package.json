@@ -3,10 +3,14 @@
   "main": "expo-router/entry",
   "version": "1.0.0",
   "scripts": {
+    "eas-build-pre-install": "npm config set legacy-peer-deps true",
     "start": "bunx rork start -p bdz76lwrkslm8z9qas7bm --tunnel",
     "start-web": "bunx rork start -p bdz76lwrkslm8z9qas7bm --web --tunnel",
     "start-web-dev": "DEBUG=expo* bunx rork start -p bdz76lwrkslm8z9qas7bm --web --tunnel",
-    "lint": "expo lint"
+    "lint": "expo lint",
+    "build:apk": "eas build --platform android --profile preview --non-interactive",
+    "android": "expo run:android",
+    "ios": "expo run:ios"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",

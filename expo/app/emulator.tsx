@@ -52,7 +52,21 @@ export default function EmulatorScreen() {
           setLoading(false);
           return;
         }
-        console.log('[Emulator] ROM loaded, size:', base64.length, 'bytes base64');
+        // Rough estimate: base64 is ~4/3 of the original binary size.
+        const approxBytes = base64.length * 0.75;
+        console.log('[Emulator] ROM loaded, approx size:', approxBytes, 'bytes');
+
+        // Soft safety guard: allow up to ~1GB on native before we give up.
+        // Note: pushing this high increases the risk of WebView/OS OOM crashes,
+        // but this matches the requested behavior.
+        const ONE_GB = 1024 * 1024 * 1024;
+        if (Platform.OS !== 'web' && approxBytes > ONE_GB) {
+          console.log('[Emulator] ROM exceeds 1GB guard on Android');
+          setError('This ROM file is larger than 1GB and cannot be loaded.');
+          setLoading(false);
+          return;
+        }
+
         const emulatorHtml = getEmulatorHtml(base64, core, romId);
         setHtml(emulatorHtml);
       } catch (err) {
