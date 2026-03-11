@@ -61,7 +61,7 @@ export default function EmptyLibrary({ onImport }: EmptyLibraryProps) {
       <Text style={styles.title}>No Games Yet</Text>
       <Text style={styles.subtitle}>
         Import your ROM files to start playing.{'\n'}
-        Supports .gb, .gbc, and .gba formats.
+        NES, SNES, N64, Game Boy, GBA, DS, Genesis
       </Text>
 
       <TouchableOpacity

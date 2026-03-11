@@ -3,7 +3,7 @@ import { Platform, Alert } from 'react-native';
 import * as DocumentPicker from 'expo-document-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import createContextHook from '@nkzw/create-context-hook';
-import { Rom, RomPlatform, SUPPORTED_EXTENSIONS } from '@/types/rom';
+import { Rom, RomPlatform, SUPPORTED_EXTENSIONS, EXT_TO_PLATFORM } from '@/types/rom';
 
 const ROMS_STORAGE_KEY = 'retryx_roms';
 const webRomCache = new Map<string, string>();
@@ -103,13 +103,13 @@ export const [RomProvider, useRoms] = createContextHook(() => {
       if (!SUPPORTED_EXTENSIONS.includes(ext)) {
         Alert.alert(
           'Unsupported File',
-          'Please select a .gb, .gbc, or .gba ROM file.',
+          'Supported formats: .gb, .gbc, .gba, .nes, .sfc, .smc, .n64, .z64, .v64, .nds, .gen, .md, .smd',
           [{ text: 'OK' }]
         );
         return;
       }
 
-      const platform = ext as RomPlatform;
+      const platform: RomPlatform = EXT_TO_PLATFORM[ext] ?? (ext as RomPlatform);
       let fileUri = asset.uri;
 
       if (Platform.OS !== 'web') {
@@ -121,7 +121,7 @@ export const [RomProvider, useRoms] = createContextHook(() => {
           webRomCache.set(romId, base64);
           const rom: Rom = {
             id: romId,
-            name: asset.name.replace(/\.(gb|gbc|gba)$/i, ''),
+            name: asset.name.replace(/\.(gb|gbc|gba|nes|sfc|smc|n64|z64|v64|nds|gen|md|smd)$/i, ''),
             fileName: asset.name,
             fileUri: asset.uri,
             platform,
@@ -149,7 +149,7 @@ export const [RomProvider, useRoms] = createContextHook(() => {
             webRomCache.set(romId, b64);
             const rom: Rom = {
               id: romId,
-              name: asset.name.replace(/\.(gb|gbc|gba)$/i, ''),
+              name: asset.name.replace(/\.(gb|gbc|gba|nes|sfc|smc|n64|z64|v64|nds|gen|md|smd)$/i, ''),
               fileName: asset.name,
               fileUri: asset.uri,
               platform,
@@ -168,7 +168,7 @@ export const [RomProvider, useRoms] = createContextHook(() => {
 
       const rom: Rom = {
         id: Date.now().toString(),
-        name: asset.name.replace(/\.(gb|gbc|gba)$/i, ''),
+        name: asset.name.replace(/\.(gb|gbc|gba|nes|sfc|smc|n64|z64|v64|nds|gen|md|smd)$/i, ''),
         fileName: asset.name,
         fileUri,
         platform,

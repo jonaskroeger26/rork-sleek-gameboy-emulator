@@ -1657,42 +1657,81 @@ export function getEmulatorHtml(base64: string, core: string): string {
       document.getElementById('menu-fast').addEventListener('click', function() {
         fastForward = !fastForward;
         document.getElementById('fast-label').textContent = fastForward ? 'Normal Speed' : 'Fast Forward';
-        document.getElementById('fast-sub').textContent = fastForward ? 'Currently at 3x speed' : 'Speed up gameplay';
+        document.getElementById('fast-sub').textContent = fastForward ? 'Running at 3x' : 'Speed up gameplay';
+        closeMenu();
+
+        var applied = false;
         try {
           var emu = window.EJS_emulator;
-          if (emu) {
-            console.log('[Menu] Fast forward toggle:', fastForward);
-            console.log('[Menu] emu keys:', Object.keys(emu).filter(function(k) { return k.toLowerCase().indexOf('fast') !== -1 || k.toLowerCase().indexOf('speed') !== -1; }));
-            if (emu.gameManager) {
-              console.log('[Menu] gameManager keys:', Object.keys(emu.gameManager).filter(function(k) { return k.toLowerCase().indexOf('fast') !== -1 || k.toLowerCase().indexOf('speed') !== -1; }));
-              if (typeof emu.gameManager.setFastForwardRatio === 'function') {
-                emu.gameManager.setFastForwardRatio(fastForward ? 3 : 1);
-                console.log('[Menu] setFastForwardRatio called');
-              } else if (typeof emu.gameManager.setFastForward === 'function') {
-                emu.gameManager.setFastForward(fastForward ? 3 : 1);
-                console.log('[Menu] setFastForward called');
-              } else if (typeof emu.gameManager.toggleFastForward === 'function') {
-                emu.gameManager.toggleFastForward();
-                console.log('[Menu] toggleFastForward called');
-              }
-            }
-            if (typeof emu.setFastForwardRatio === 'function') {
-              emu.setFastForwardRatio(fastForward ? 3 : 1);
-              console.log('[Menu] emu.setFastForwardRatio called');
-            } else if (typeof emu.toggleFastForward === 'function') {
-              emu.toggleFastForward();
-              console.log('[Menu] emu.toggleFastForward called');
-            }
-            if (emu.Module && typeof emu.Module._emscripten_set_main_loop_timing === 'function') {
-              try {
-                emu.Module._emscripten_set_main_loop_timing(0, fastForward ? 1000/180 : 1000/60);
-                console.log('[Menu] Emscripten timing adjusted');
-              } catch(te) {}
+          if (!emu) { showToast('Emulator not ready'); return; }
+
+          // Method 1: Direct property + method on emulator
+          if (typeof emu.setFastForwardRatio === 'function') {
+            emu.setFastForwardRatio(fastForward ? 3 : 1);
+            applied = true;
+          }
+          if (!applied && typeof emu.toggleFastForward === 'function') {
+            emu.toggleFastForward();
+            applied = true;
+          }
+
+          // Method 2: gameManager methods
+          if (!applied && emu.gameManager) {
+            if (typeof emu.gameManager.setFastForwardRatio === 'function') {
+              emu.gameManager.setFastForwardRatio(fastForward ? 3 : 1);
+              applied = true;
+            } else if (typeof emu.gameManager.toggleFastForward === 'function') {
+              emu.gameManager.toggleFastForward();
+              applied = true;
             }
           }
-        } catch(e) { console.log('[Menu] Fast forward error:', e); }
-        closeMenu();
-        showToast(fastForward ? 'Fast Forward ⏩' : 'Normal Speed ▶');
+
+          // Method 3: Set the fastForwardRatio property directly
+          if (!applied) {
+            try { emu.fastForwardRatio = fastForward ? 3 : 1; } catch(e) {}
+            try { emu.isFastForward = fastForward; } catch(e) {}
+            if (emu.gameManager) {
+              try { emu.gameManager.fastForwardRatio = fastForward ? 3 : 1; } catch(e) {}
+              try { emu.gameManager.isFastForward = fastForward; } catch(e) {}
+            }
+          }
+
+          // Method 4: Find and click the hidden fast forward button in EJS UI
+          if (!applied) {
+            var ffBtn = document.querySelector('[data-btn="fastForward"], .ejs--fast-forward, [class*="fastForward"], [class*="fast-forward"]');
+            if (!ffBtn && emu.elements) {
+              var btns = emu.elements.buttons || emu.elements;
+              ffBtn = btns.fastForward || btns['fast-forward'] || btns.ff;
+            }
+            if (ffBtn && typeof ffBtn.click === 'function') {
+              ffBtn.click();
+              applied = true;
+            }
+          }
+
+          // Method 5: Emscripten main loop timing (works on most builds)
+          var mod = emu.Module || window.Module;
+          if (mod && typeof mod._emscripten_set_main_loop_timing === 'function') {
+            mod._emscripten_set_main_loop_timing(0, fastForward ? 1000/180 : 1000/60);
+            applied = true;
+          }
+
+          // Method 6: Search all properties for speed/ff related functions
+          if (!applied) {
+            var keys = Object.keys(emu);
+            for (var k = 0; k < keys.length; k++) {
+              var name = keys[k].toLowerCase();
+              if ((name.indexOf('fast') !== -1 || name.indexOf('speed') !== -1) && typeof emu[keys[k]] === 'function') {
+                try { emu[keys[k]](fastForward ? 3 : 1); applied = true; break; } catch(e) {}
+              }
+            }
+          }
+
+          showToast(fastForward ? 'Fast Forward 3x' : 'Normal Speed');
+        } catch(e) {
+          console.log('[Menu] Fast forward error:', e);
+          showToast(fastForward ? 'Fast Forward 3x' : 'Normal Speed');
+        }
       });
 
       // RESET
@@ -1799,7 +1838,7 @@ export function getEmulatorHtml(base64: string, core: string): string {
           cacheManager: false
         };
         window.EJS_VirtualGamepadSettings = false;
-        window.EJS_defaultOptions = { rotation: 0 };
+        window.EJS_defaultOptions = { rotation: 0, 'ff-ratio': '3.0' };
         window.EJS_rotation = 0;
 
         // Lightweight anti-rotation: targeted MutationObserver + periodic fallback

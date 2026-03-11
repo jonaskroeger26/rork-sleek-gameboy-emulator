@@ -19,6 +19,11 @@ const Colors = {
   platformGB: '#8BBE47',
   platformGBC: '#6366F1',
   platformGBA: '#EC4899',
+  platformNES: '#E74C3C',
+  platformSNES: '#7C3AED',
+  platformN64: '#059669',
+  platformNDS: '#2563EB',
+  platformGenesis: '#F59E0B',
 
   tabBar: '#0D0D12',
   tabBarBorder: '#1A1A24',
@@ -29,6 +34,11 @@ export const getPlatformColor = (platform: string): string => {
     case 'gb': return Colors.platformGB;
     case 'gbc': return Colors.platformGBC;
     case 'gba': return Colors.platformGBA;
+    case 'nes': return Colors.platformNES;
+    case 'snes': return Colors.platformSNES;
+    case 'n64': return Colors.platformN64;
+    case 'nds': return Colors.platformNDS;
+    case 'segaMD': return Colors.platformGenesis;
     default: return Colors.primary;
   }
 };
