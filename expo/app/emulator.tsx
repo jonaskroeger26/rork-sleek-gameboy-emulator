@@ -53,7 +53,7 @@ export default function EmulatorScreen() {
           return;
         }
         console.log('[Emulator] ROM loaded, size:', base64.length, 'bytes base64');
-        const emulatorHtml = getEmulatorHtml(base64, core);
+        const emulatorHtml = getEmulatorHtml(base64, core, romId);
         setHtml(emulatorHtml);
       } catch (err) {
         console.log('[Emulator] Error loading ROM:', err);

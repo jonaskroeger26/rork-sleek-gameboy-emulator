@@ -1,4 +1,4 @@
-export function getEmulatorHtml(base64: string, core: string): string {
+export function getEmulatorHtml(base64: string, core: string, romId?: string): string {
   const cleanBase64 = base64.replace(/data:[^;]+;base64,/g, '').replace(/[\r\n\s]/g, '');
 
   return `<!DOCTYPE html>
@@ -1042,7 +1042,7 @@ export function getEmulatorHtml(base64: string, core: string): string {
       var audioMuted = false;
       var fastForward = false;
       var gameStartTime = Date.now();
-      var SAVE_SLOTS_KEY = 'retryx_saves';
+      var SAVE_SLOTS_KEY = 'retryx_saves_${romId || "default"}';
       var MAX_SLOTS = 8;
 
       var keyMap = {
