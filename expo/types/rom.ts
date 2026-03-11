@@ -52,6 +52,17 @@ export const SUPPORTED_EXTENSIONS = [
   'gen', 'md', 'smd',
 ];
 
+export const PLATFORM_LIBRETRO_SYSTEM: Record<RomPlatform, string> = {
+  gb: 'Nintendo - Game Boy',
+  gbc: 'Nintendo - Game Boy Color',
+  gba: 'Nintendo - Game Boy Advance',
+  nes: 'Nintendo - Nintendo Entertainment System',
+  snes: 'Nintendo - Super Nintendo Entertainment System',
+  n64: 'Nintendo - Nintendo 64',
+  nds: 'Nintendo - Nintendo DS',
+  segaMD: 'Sega - Mega Drive - Genesis',
+};
+
 export const EXT_TO_PLATFORM: Record<string, RomPlatform> = {
   gb: 'gb',
   gbc: 'gbc',

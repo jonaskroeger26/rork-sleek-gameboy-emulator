@@ -1,12 +1,61 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { Platform, Alert } from 'react-native';
+import { Platform, Alert, Image as RNImage } from 'react-native';
 import * as DocumentPicker from 'expo-document-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import createContextHook from '@nkzw/create-context-hook';
-import { Rom, RomPlatform, SUPPORTED_EXTENSIONS, EXT_TO_PLATFORM } from '@/types/rom';
+import { Rom, RomPlatform, SUPPORTED_EXTENSIONS, EXT_TO_PLATFORM, PLATFORM_LIBRETRO_SYSTEM } from '@/types/rom';
 
 const ROMS_STORAGE_KEY = 'retryx_roms';
 const webRomCache = new Map<string, string>();
+
+const THUMBNAIL_BASE = 'https://thumbnails.libretro.com';
+
+async function tryImageUrl(url: string): Promise<boolean> {
+  try {
+    if (Platform.OS !== 'web') {
+      await RNImage.prefetch(url);
+      return true;
+    }
+    return await new Promise<boolean>((resolve) => {
+      const img = new (globalThis as any).Image();
+      img.onload = () => resolve(true);
+      img.onerror = () => resolve(false);
+      img.src = url;
+      setTimeout(() => resolve(false), 5000);
+    });
+  } catch {
+    return false;
+  }
+}
+
+async function fetchBoxArt(romName: string, platform: RomPlatform): Promise<string | null> {
+  const system = PLATFORM_LIBRETRO_SYSTEM[platform];
+  if (!system) return null;
+  const systemEncoded = encodeURIComponent(system);
+
+  const baseName = romName.replace(/\s*\[.*?\]/g, '').trim();
+  const stripped = baseName.replace(/\s*\(.*?\)/g, '').trim();
+  const normalized = stripped.replace(/_/g, ' ');
+
+  const attempts = [baseName, stripped, normalized];
+  if (!baseName.includes('(')) {
+    for (const region of ['(USA)', '(USA, Europe)', '(World)', '(Europe)', '(Japan)']) {
+      attempts.push(`${normalized} ${region}`);
+    }
+  }
+
+  const seen = new Set<string>();
+  for (const name of attempts) {
+    if (seen.has(name)) continue;
+    seen.add(name);
+    const url = `${THUMBNAIL_BASE}/${systemEncoded}/Named_Boxarts/${encodeURIComponent(name)}.png`;
+    if (await tryImageUrl(url)) {
+      console.log('[BoxArt] Found:', name);
+      return url;
+    }
+  }
+  return null;
+}
 
 const copyRomToStorage = async (sourceUri: string, fileName: string): Promise<string> => {
   if (Platform.OS === 'web') return sourceUri;
@@ -130,6 +179,7 @@ export const [RomProvider, useRoms] = createContextHook(() => {
           const updated = [...roms, rom];
           await saveRoms(updated);
           console.log('[RomContext] Imported ROM (web):', rom.name);
+          void lookupBoxArt(rom);
           return;
         } else {
           try {
@@ -158,6 +208,7 @@ export const [RomProvider, useRoms] = createContextHook(() => {
             const updated = [...roms, rom];
             await saveRoms(updated);
             console.log('[RomContext] Imported ROM (web fallback):', rom.name);
+            void lookupBoxArt(rom);
             return;
           } catch {
             Alert.alert('Error', 'Could not read file on web.');
@@ -178,6 +229,7 @@ export const [RomProvider, useRoms] = createContextHook(() => {
       const updated = [...roms, rom];
       await saveRoms(updated);
       console.log('[RomContext] Imported ROM:', rom.name);
+      void lookupBoxArt(rom);
     } catch (err) {
       console.log('[RomContext] Import error:', err);
       Alert.alert('Import Error', 'Failed to import ROM file. Please try again.');
@@ -242,6 +294,26 @@ export const [RomProvider, useRoms] = createContextHook(() => {
     await saveRoms(updated);
     console.log('[RomContext] Cover image saved for:', rom.name);
   }, [roms, saveRoms]);
+
+  const lookupBoxArt = useCallback(async (rom: Rom) => {
+    try {
+      const artUrl = await fetchBoxArt(rom.name, rom.platform);
+      if (!artUrl) return;
+      const stored = await AsyncStorage.getItem(ROMS_STORAGE_KEY);
+      if (!stored) return;
+      const current: Rom[] = JSON.parse(stored);
+      const target = current.find(r => r.id === rom.id);
+      if (!target || target.coverImage) return;
+      const updated = current.map(r =>
+        r.id === rom.id ? { ...r, coverImage: artUrl } : r
+      );
+      await AsyncStorage.setItem(ROMS_STORAGE_KEY, JSON.stringify(updated));
+      setRoms(updated);
+      console.log('[RomContext] Box art set for:', rom.name);
+    } catch (e) {
+      console.log('[RomContext] Box art lookup failed:', e);
+    }
+  }, []);
 
   return useMemo(() => ({
     roms: [...roms].sort((a, b) => {

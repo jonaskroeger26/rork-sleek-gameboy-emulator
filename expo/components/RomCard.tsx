@@ -35,6 +35,7 @@ function formatTimeAgo(dateString: string): string {
 
 function RomCard({ rom, onPlay, onDelete }: RomCardProps) {
   const scaleAnim = useRef(new Animated.Value(1)).current;
+  const [imageError, setImageError] = React.useState(false);
   const platformColor = getPlatformColor(rom.platform);
 
   const handlePressIn = useCallback(() => {
@@ -75,7 +76,7 @@ function RomCard({ rom, onPlay, onDelete }: RomCardProps) {
     ]);
   }, [rom, onDelete]);
 
-  const hasCover = !!rom.coverImage;
+  const hasCover = !!rom.coverImage && !imageError;
 
   return (
     <Animated.View style={[styles.cardWrapper, { transform: [{ scale: scaleAnim }] }]}>
@@ -95,6 +96,7 @@ function RomCard({ rom, onPlay, onDelete }: RomCardProps) {
                 source={{ uri: rom.coverImage }}
                 style={styles.iconImage}
                 resizeMode="cover"
+                onError={() => setImageError(true)}
               />
             ) : (
               <View style={styles.iconPlaceholder}>
