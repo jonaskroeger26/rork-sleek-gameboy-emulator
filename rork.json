@@ -1,0 +1,9 @@
+{
+  "apps": [
+    {
+      "name": "RetroPlay",
+      "path": "expo",
+      "framework": "react-native"
+    }
+  ]
+}
