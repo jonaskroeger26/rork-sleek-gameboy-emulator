@@ -27,7 +27,7 @@ export default function EmulatorScreen() {
   }>();
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { getRomBase64 } = useRoms();
+  const { getRomBase64, updateCoverImage } = useRoms();
 
   const [html, setHtml] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -84,6 +84,10 @@ export default function EmulatorScreen() {
           console.log('[Emulator] iframe game started');
           setGameStarted(true);
           setLoading(false);
+        } else if (data.type === 'thumbnail') {
+          if (romId && data.image) {
+            void updateCoverImage(romId, data.image);
+          }
         } else if (data.type === 'error') {
           console.log('[Emulator] iframe error:', data.message);
           setError(data.message ?? 'Emulator error.');
@@ -108,6 +112,10 @@ export default function EmulatorScreen() {
           duration: 2000,
           useNativeDriver: true,
         }).start();
+      } else if (data.type === 'thumbnail') {
+        if (romId && data.image) {
+          void updateCoverImage(romId, data.image);
+        }
       } else if (data.type === 'error') {
         console.log('[Emulator] Emulator error:', data.message);
         setError(data.message ?? 'Emulator encountered an error.');
@@ -116,7 +124,7 @@ export default function EmulatorScreen() {
     } catch {
       console.log('[Emulator] Message parse error');
     }
-  }, [backButtonOpacity]);
+  }, [backButtonOpacity, romId, updateCoverImage]);
 
   const handleBack = useCallback(() => {
     if (gameStarted) {

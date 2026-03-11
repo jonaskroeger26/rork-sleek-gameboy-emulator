@@ -233,6 +233,16 @@ export const [RomProvider, useRoms] = createContextHook(() => {
     await saveRoms(updated);
   }, [roms, saveRoms]);
 
+  const updateCoverImage = useCallback(async (id: string, imageDataUrl: string) => {
+    const rom = roms.find(r => r.id === id);
+    if (!rom || rom.coverImage) return;
+    const updated = roms.map(r =>
+      r.id === id ? { ...r, coverImage: imageDataUrl } : r
+    );
+    await saveRoms(updated);
+    console.log('[RomContext] Cover image saved for:', rom.name);
+  }, [roms, saveRoms]);
+
   return useMemo(() => ({
     roms: [...roms].sort((a, b) => {
       if (a.lastPlayed && b.lastPlayed) {
@@ -248,5 +258,6 @@ export const [RomProvider, useRoms] = createContextHook(() => {
     clearAllRoms,
     getRomBase64,
     updateLastPlayed,
-  }), [roms, isLoading, importRom, deleteRom, clearAllRoms, getRomBase64, updateLastPlayed]);
+    updateCoverImage,
+  }), [roms, isLoading, importRom, deleteRom, clearAllRoms, getRomBase64, updateLastPlayed, updateCoverImage]);
 });

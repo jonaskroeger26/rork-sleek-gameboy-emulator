@@ -1759,6 +1759,30 @@ export function getEmulatorHtml(base64: string, core: string): string {
         }
         sendMessage('gameStarted');
         hideEmulatorUI();
+        setTimeout(captureGameThumbnail, 3500);
+      }
+
+      function captureGameThumbnail() {
+        try {
+          var canvas = document.querySelector('#game canvas');
+          if (!canvas || !canvas.width || !canvas.height) return;
+          var MAX = 192;
+          var w = canvas.width, h = canvas.height;
+          var scale = Math.min(MAX / w, MAX / h);
+          var tw = Math.round(w * scale), th = Math.round(h * scale);
+          var thumb = document.createElement('canvas');
+          thumb.width = tw;
+          thumb.height = th;
+          var ctx = thumb.getContext('2d');
+          if (!ctx) return;
+          ctx.imageSmoothingEnabled = false;
+          ctx.drawImage(canvas, 0, 0, tw, th);
+          var dataUrl = thumb.toDataURL('image/jpeg', 0.8);
+          if (dataUrl && dataUrl.length > 100) {
+            sendMessage('thumbnail', { image: dataUrl });
+            console.log('[EmuHTML] Thumbnail captured, size:', dataUrl.length);
+          }
+        } catch(e) { console.log('[EmuHTML] Thumbnail error:', e); }
       }
 
       var _uiStyleAdded = false;
