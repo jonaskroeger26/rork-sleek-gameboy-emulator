@@ -113,11 +113,12 @@ export function getEmulatorHtml(base64: string, core: string): string {
     #controls-area {
       width: 100%;
       flex: 1 1 auto;
-      background: #0b0b15;
+      background: linear-gradient(175deg, #0f0f1a 0%, #0a0a14 45%, #0d0b1e 100%);
       position: relative;
       display: flex;
       flex-direction: column;
       flex-shrink: 0;
+      border-top: 1px solid rgba(20, 241, 149, 0.12);
     }
 
     .shoulder-row {
@@ -134,21 +135,25 @@ export function getEmulatorHtml(base64: string, core: string): string {
       width: 26%;
       height: 28px;
       border-radius: 0 0 10px 10px;
-      background: #101024;
+      background: #0e0e22;
       display: flex;
       align-items: center;
       justify-content: center;
-      color: rgba(153,69,255,0.5);
+      color: rgba(153,69,255,0.6);
       font-size: 11px;
       font-weight: 700;
       letter-spacing: 3px;
       cursor: pointer;
       -webkit-tap-highlight-color: transparent;
       transition: all 0.08s ease;
+      border: 1px solid rgba(153,69,255,0.12);
+      border-top: none;
+      box-shadow: inset 0 -2px 4px rgba(0,0,0,0.3);
     }
     .shoulder-btn:active, .shoulder-btn.pressed {
-      background: rgba(153,69,255,0.12);
-      color: #9945FF;
+      background: #0c0c1e;
+      color: rgba(153,69,255,0.4);
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
     }
 
     .shoulder-label {
@@ -156,12 +161,16 @@ export function getEmulatorHtml(base64: string, core: string): string {
       left: 50%;
       top: 50%;
       transform: translate(-50%, -50%);
-      color: rgba(255,255,255,0.05);
-      font-size: 8px;
-      font-weight: 700;
-      letter-spacing: 6px;
+      background: linear-gradient(90deg, #14F195, #9945FF);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-size: 9px;
+      font-weight: 800;
+      letter-spacing: 5px;
       text-transform: uppercase;
       pointer-events: none;
+      opacity: 0.5;
     }
 
     .controls-main {
@@ -208,6 +217,7 @@ export function getEmulatorHtml(base64: string, core: string): string {
       background: #14142a;
       border-radius: 11px;
       box-shadow: inset 0 1px 0 rgba(255,255,255,0.03), 0 2px 8px rgba(0,0,0,0.35);
+      border: 1px solid rgba(20, 241, 149, 0.12);
     }
 
     .dpad-cross-h {
@@ -220,6 +230,7 @@ export function getEmulatorHtml(base64: string, core: string): string {
       background: #14142a;
       border-radius: 11px;
       box-shadow: inset 0 1px 0 rgba(255,255,255,0.03), 0 2px 8px rgba(0,0,0,0.35);
+      border: 1px solid rgba(20, 241, 149, 0.12);
     }
 
     .dpad-center-circle {
@@ -227,10 +238,11 @@ export function getEmulatorHtml(base64: string, core: string): string {
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      width: 10px;
-      height: 10px;
+      width: 14px;
+      height: 14px;
       border-radius: 50%;
-      background: rgba(20, 241, 149, 0.25);
+      background: radial-gradient(circle, #14F195 0%, #0bc47a 100%);
+      box-shadow: 0 0 8px rgba(20, 241, 149, 0.2);
       z-index: 3;
       pointer-events: none;
     }
@@ -247,7 +259,7 @@ export function getEmulatorHtml(base64: string, core: string): string {
     }
 
     .dpad-btn:active, .dpad-btn.pressed {
-      background: rgba(20,241,149,0.04);
+      background: transparent;
     }
 
     .dpad-up {
@@ -287,7 +299,7 @@ export function getEmulatorHtml(base64: string, core: string): string {
       width: 0;
       height: 0;
       border-style: solid;
-      opacity: 0.15;
+      opacity: 0.35;
     }
     .dpad-up .dpad-arrow {
       border-width: 0 5px 7px 5px;
@@ -304,9 +316,6 @@ export function getEmulatorHtml(base64: string, core: string): string {
     .dpad-right .dpad-arrow {
       border-width: 5px 0 5px 7px;
       border-color: transparent transparent transparent #14F195;
-    }
-    .dpad-btn:active .dpad-arrow, .dpad-btn.pressed .dpad-arrow {
-      opacity: 0.5;
     }
 
     .ab-container {
@@ -332,31 +341,35 @@ export function getEmulatorHtml(base64: string, core: string): string {
       letter-spacing: 0.5px;
     }
     .action-btn:active, .action-btn.pressed {
-      transform: scale(0.92);
+      /* transform overridden per-button below */
     }
 
     .btn-a {
       right: 0;
       top: 6px;
-      background: #9945FF;
-      color: rgba(255,255,255,0.8);
-      box-shadow: 0 4px 14px rgba(153,69,255,0.2), inset 0 1px 0 rgba(255,255,255,0.1);
+      background: linear-gradient(160deg, #a85cff 0%, #7B2FE0 100%);
+      color: rgba(255,255,255,0.9);
+      box-shadow: 0 5px 0 #5a1fb8, 0 8px 16px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.15);
+      border: none;
     }
     .btn-a:active, .btn-a.pressed {
-      background: #a55cff;
-      box-shadow: 0 2px 20px rgba(153,69,255,0.35);
+      background: linear-gradient(160deg, #9945FF 0%, #6e28cc 100%);
+      box-shadow: 0 2px 0 #5a1fb8, 0 4px 8px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1);
+      transform: scale(0.96) translateY(3px);
     }
 
     .btn-b {
       left: 14px;
       bottom: 6px;
-      background: #14F195;
-      color: rgba(0,0,0,0.5);
-      box-shadow: 0 4px 14px rgba(20,241,149,0.15), inset 0 1px 0 rgba(255,255,255,0.12);
+      background: linear-gradient(160deg, #2bffaa 0%, #0bc47a 100%);
+      color: rgba(0,0,0,0.6);
+      box-shadow: 0 5px 0 #078c55, 0 8px 16px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.18);
+      border: none;
     }
     .btn-b:active, .btn-b.pressed {
-      background: #2fffa3;
-      box-shadow: 0 2px 20px rgba(20,241,149,0.3);
+      background: linear-gradient(160deg, #14F195 0%, #0aaf6a 100%);
+      box-shadow: 0 2px 0 #078c55, 0 4px 8px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.12);
+      transform: scale(0.96) translateY(3px);
     }
 
     .bottom-row {
@@ -377,27 +390,30 @@ export function getEmulatorHtml(base64: string, core: string): string {
     }
 
     .meta-btn {
-      width: 48px;
-      height: 16px;
-      border-radius: 8px;
+      width: 50px;
+      height: 18px;
+      border-radius: 9px;
       background: #101024;
+      border: 1px solid rgba(255,255,255,0.06);
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
       -webkit-tap-highlight-color: transparent;
       transition: all 0.08s ease;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.3);
     }
     .meta-btn:active, .meta-btn.pressed {
       background: #181836;
-      transform: scaleY(0.9);
+      box-shadow: inset 0 1px 2px rgba(0,0,0,0.4);
+      transform: scaleY(0.92);
     }
 
     .meta-btn-inner {
-      width: 14px;
-      height: 2px;
-      border-radius: 1px;
-      background: rgba(255,255,255,0.08);
+      width: 16px;
+      height: 3px;
+      border-radius: 1.5px;
+      background: rgba(255,255,255,0.1);
     }
 
     .meta-btn-menu {
@@ -405,6 +421,7 @@ export function getEmulatorHtml(base64: string, core: string): string {
       height: 38px;
       border-radius: 19px;
       background: #101024;
+      border: 1px solid rgba(20, 241, 149, 0.1);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -424,11 +441,12 @@ export function getEmulatorHtml(base64: string, core: string): string {
       width: 3px;
       height: 3px;
       border-radius: 50%;
-      background: rgba(255,255,255,0.2);
+      background: linear-gradient(135deg, #14F195 0%, #9945FF 100%);
+      opacity: 0.6;
     }
 
     .meta-label {
-      color: rgba(255,255,255,0.1);
+      color: rgba(255,255,255,0.25);
       font-size: 7px;
       font-weight: 600;
       letter-spacing: 1.5px;
@@ -442,10 +460,14 @@ export function getEmulatorHtml(base64: string, core: string): string {
     }
 
     .retryx-logo {
-      color: rgba(255,255,255,0.05);
-      font-size: 8px;
-      font-weight: 700;
-      letter-spacing: 4px;
+      background: linear-gradient(90deg, #14F195, #9945FF);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 3px;
+      opacity: 0.5;
     }
 
     /* MENU OVERLAY */
