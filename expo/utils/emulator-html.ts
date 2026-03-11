@@ -113,48 +113,42 @@ export function getEmulatorHtml(base64: string, core: string): string {
     #controls-area {
       width: 100%;
       flex: 1 1 auto;
-      background: linear-gradient(170deg, #0f0f1a 0%, #0a0a14 40%, #0d0b1e 100%);
+      background: #0b0b15;
       position: relative;
       display: flex;
       flex-direction: column;
       flex-shrink: 0;
-      border-top: 1px solid rgba(20, 241, 149, 0.15);
     }
 
     .shoulder-row {
       width: 100%;
       display: flex;
       justify-content: space-between;
-      align-items: center;
+      align-items: flex-start;
       padding: 0;
       flex-shrink: 0;
       position: relative;
     }
 
     .shoulder-btn {
-      width: 28%;
-      height: 34px;
+      width: 26%;
+      height: 28px;
       border-radius: 0 0 10px 10px;
-      background: linear-gradient(180deg, #1a1a2e 0%, #12121f 100%);
-      border: 1px solid rgba(153, 69, 255, 0.25);
-      border-top: none;
+      background: #101024;
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #9945FF;
-      font-size: 15px;
-      font-weight: 800;
-      letter-spacing: 2px;
+      color: rgba(153,69,255,0.5);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 3px;
       cursor: pointer;
       -webkit-tap-highlight-color: transparent;
-      transition: all 0.06s ease;
-      box-shadow: 0 2px 8px rgba(153, 69, 255, 0.15), inset 0 1px 0 rgba(153, 69, 255, 0.1);
+      transition: all 0.08s ease;
     }
     .shoulder-btn:active, .shoulder-btn.pressed {
-      background: linear-gradient(180deg, #9945FF 0%, #7B2FE0 100%);
-      color: #fff;
-      box-shadow: 0 0 16px rgba(153, 69, 255, 0.4);
-      transform: scaleY(0.95);
+      background: rgba(153,69,255,0.12);
+      color: #9945FF;
     }
 
     .shoulder-label {
@@ -162,16 +156,12 @@ export function getEmulatorHtml(base64: string, core: string): string {
       left: 50%;
       top: 50%;
       transform: translate(-50%, -50%);
-      background: linear-gradient(90deg, #14F195, #9945FF);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      font-size: 11px;
-      font-weight: 800;
-      letter-spacing: 5px;
+      color: rgba(255,255,255,0.05);
+      font-size: 8px;
+      font-weight: 700;
+      letter-spacing: 6px;
       text-transform: uppercase;
       pointer-events: none;
-      opacity: 0.5;
     }
 
     .controls-main {
@@ -179,13 +169,13 @@ export function getEmulatorHtml(base64: string, core: string): string {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 16px 24px 10px;
+      padding: 20px 28px 14px;
       flex: 1 1 auto;
     }
 
     .dpad-container {
-      width: 150px;
-      height: 150px;
+      width: 136px;
+      height: 136px;
       position: relative;
     }
 
@@ -194,8 +184,8 @@ export function getEmulatorHtml(base64: string, core: string): string {
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      width: 150px;
-      height: 150px;
+      width: 136px;
+      height: 136px;
     }
 
     .dpad-cross {
@@ -203,8 +193,8 @@ export function getEmulatorHtml(base64: string, core: string): string {
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      width: 150px;
-      height: 150px;
+      width: 136px;
+      height: 136px;
       pointer-events: none;
     }
 
@@ -213,12 +203,11 @@ export function getEmulatorHtml(base64: string, core: string): string {
       top: 0;
       left: 50%;
       transform: translateX(-50%);
-      width: 50px;
-      height: 150px;
-      background: linear-gradient(180deg, #1e1e30 0%, #16162a 30%, #121225 70%, #16162a 100%);
-      border-radius: 10px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.5), inset 0 1px 0 rgba(20, 241, 149, 0.08);
-      border: 1px solid rgba(20, 241, 149, 0.12);
+      width: 44px;
+      height: 136px;
+      background: #14142a;
+      border-radius: 11px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.03), 0 2px 8px rgba(0,0,0,0.35);
     }
 
     .dpad-cross-h {
@@ -226,12 +215,11 @@ export function getEmulatorHtml(base64: string, core: string): string {
       top: 50%;
       left: 0;
       transform: translateY(-50%);
-      width: 150px;
-      height: 50px;
-      background: linear-gradient(180deg, #1e1e30 0%, #16162a 30%, #121225 70%, #16162a 100%);
-      border-radius: 10px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.5), inset 0 1px 0 rgba(20, 241, 149, 0.08);
-      border: 1px solid rgba(20, 241, 149, 0.12);
+      width: 136px;
+      height: 44px;
+      background: #14142a;
+      border-radius: 11px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.03), 0 2px 8px rgba(0,0,0,0.35);
     }
 
     .dpad-center-circle {
@@ -239,11 +227,10 @@ export function getEmulatorHtml(base64: string, core: string): string {
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      width: 20px;
-      height: 20px;
+      width: 10px;
+      height: 10px;
       border-radius: 50%;
-      background: radial-gradient(circle, #14F195 0%, #0bc47a 100%);
-      box-shadow: 0 0 8px rgba(20, 241, 149, 0.3), inset 0 1px 2px rgba(0,0,0,0.2);
+      background: rgba(20, 241, 149, 0.25);
       z-index: 3;
       pointer-events: none;
     }
@@ -260,128 +247,125 @@ export function getEmulatorHtml(base64: string, core: string): string {
     }
 
     .dpad-btn:active, .dpad-btn.pressed {
-      background: transparent;
+      background: rgba(20,241,149,0.04);
     }
 
     .dpad-up {
-      width: 50px;
-      height: 65px;
+      width: 44px;
+      height: 58px;
       top: 0;
       left: 50%;
       transform: translateX(-50%);
-      border-radius: 10px 10px 0 0;
+      border-radius: 11px 11px 0 0;
     }
     .dpad-down {
-      width: 50px;
-      height: 65px;
+      width: 44px;
+      height: 58px;
       bottom: 0;
       left: 50%;
       transform: translateX(-50%);
-      border-radius: 0 0 10px 10px;
+      border-radius: 0 0 11px 11px;
     }
     .dpad-left {
-      width: 65px;
-      height: 50px;
+      width: 58px;
+      height: 44px;
       left: 0;
       top: 50%;
       transform: translateY(-50%);
-      border-radius: 10px 0 0 10px;
+      border-radius: 11px 0 0 11px;
     }
     .dpad-right {
-      width: 65px;
-      height: 50px;
+      width: 58px;
+      height: 44px;
       right: 0;
       top: 50%;
       transform: translateY(-50%);
-      border-radius: 0 10px 10px 0;
+      border-radius: 0 11px 11px 0;
     }
 
     .dpad-arrow {
       width: 0;
       height: 0;
       border-style: solid;
-      opacity: 0.35;
+      opacity: 0.15;
     }
     .dpad-up .dpad-arrow {
-      border-width: 0 7px 10px 7px;
+      border-width: 0 5px 7px 5px;
       border-color: transparent transparent #14F195 transparent;
     }
     .dpad-down .dpad-arrow {
-      border-width: 10px 7px 0 7px;
+      border-width: 7px 5px 0 5px;
       border-color: #14F195 transparent transparent transparent;
     }
     .dpad-left .dpad-arrow {
-      border-width: 7px 10px 7px 0;
+      border-width: 5px 7px 5px 0;
       border-color: transparent #14F195 transparent transparent;
     }
     .dpad-right .dpad-arrow {
-      border-width: 7px 0 7px 10px;
+      border-width: 5px 0 5px 7px;
       border-color: transparent transparent transparent #14F195;
     }
     .dpad-btn:active .dpad-arrow, .dpad-btn.pressed .dpad-arrow {
-      opacity: 0.35;
+      opacity: 0.5;
     }
 
     .ab-container {
       position: relative;
-      width: 150px;
-      height: 150px;
+      width: 136px;
+      height: 136px;
     }
 
     .action-btn {
       position: absolute;
-      width: 66px;
-      height: 66px;
+      width: 60px;
+      height: 60px;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 22px;
-      font-weight: 800;
+      font-size: 17px;
+      font-weight: 700;
       cursor: pointer;
       -webkit-tap-highlight-color: transparent;
       border: none;
-      transition: all 0.06s ease;
+      transition: all 0.08s ease;
+      letter-spacing: 0.5px;
     }
     .action-btn:active, .action-btn.pressed {
-      transform: scale(0.93);
+      transform: scale(0.92);
     }
 
     .btn-a {
-      right: 4px;
-      top: 8px;
-      background: linear-gradient(135deg, #9945FF 0%, #7B2FE0 100%);
-      color: rgba(255,255,255,0.9);
-      box-shadow: 0 3px 12px rgba(153, 69, 255, 0.4), inset 0 2px 0 rgba(255,255,255,0.15), inset 0 -2px 0 rgba(0,0,0,0.2);
-      border: 1px solid rgba(153, 69, 255, 0.5);
+      right: 0;
+      top: 6px;
+      background: #9945FF;
+      color: rgba(255,255,255,0.8);
+      box-shadow: 0 4px 14px rgba(153,69,255,0.2), inset 0 1px 0 rgba(255,255,255,0.1);
     }
     .btn-a:active, .btn-a.pressed {
-      background: linear-gradient(135deg, #B06CFF 0%, #9945FF 100%);
-      box-shadow: 0 0 20px rgba(153, 69, 255, 0.5);
+      background: #a55cff;
+      box-shadow: 0 2px 20px rgba(153,69,255,0.35);
     }
 
     .btn-b {
-      left: 16px;
-      bottom: 8px;
-      background: linear-gradient(135deg, #14F195 0%, #0bc47a 100%);
-      color: rgba(0,0,0,0.7);
-      box-shadow: 0 3px 12px rgba(20, 241, 149, 0.3), inset 0 2px 0 rgba(255,255,255,0.2), inset 0 -2px 0 rgba(0,0,0,0.15);
-      border: 1px solid rgba(20, 241, 149, 0.5);
+      left: 14px;
+      bottom: 6px;
+      background: #14F195;
+      color: rgba(0,0,0,0.5);
+      box-shadow: 0 4px 14px rgba(20,241,149,0.15), inset 0 1px 0 rgba(255,255,255,0.12);
     }
     .btn-b:active, .btn-b.pressed {
-      background: linear-gradient(135deg, #3DFFA8 0%, #14F195 100%);
-      box-shadow: 0 0 20px rgba(20, 241, 149, 0.4);
+      background: #2fffa3;
+      box-shadow: 0 2px 20px rgba(20,241,149,0.3);
     }
-
-
 
     .bottom-row {
       width: 100%;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 8px 24px;
-      padding-bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+      padding: 4px 28px;
+      padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
       flex-shrink: 0;
     }
 
@@ -389,142 +373,131 @@ export function getEmulatorHtml(base64: string, core: string): string {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 5px;
+      gap: 4px;
     }
 
     .meta-btn {
-      width: 52px;
-      height: 20px;
-      border-radius: 10px;
-      background: linear-gradient(180deg, #222238 0%, #181828 100%);
-      border: 1px solid rgba(255,255,255,0.08);
+      width: 48px;
+      height: 16px;
+      border-radius: 8px;
+      background: #101024;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
       -webkit-tap-highlight-color: transparent;
       transition: all 0.08s ease;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.04);
     }
     .meta-btn:active, .meta-btn.pressed {
-      background: linear-gradient(180deg, #2a2a44 0%, #1e1e34 100%);
-      box-shadow: inset 0 1px 3px rgba(0,0,0,0.6);
-      transform: scaleY(0.92);
+      background: #181836;
+      transform: scaleY(0.9);
     }
 
     .meta-btn-inner {
-      width: 18px;
-      height: 4px;
-      border-radius: 2px;
-      background: rgba(255,255,255,0.12);
+      width: 14px;
+      height: 2px;
+      border-radius: 1px;
+      background: rgba(255,255,255,0.08);
     }
 
     .meta-btn-menu {
-      width: 44px;
-      height: 44px;
-      border-radius: 22px;
-      background: linear-gradient(145deg, #1e1e34 0%, #14142a 100%);
-      border: 1px solid rgba(20, 241, 149, 0.15);
+      width: 38px;
+      height: 38px;
+      border-radius: 19px;
+      background: #101024;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
       -webkit-tap-highlight-color: transparent;
       transition: all 0.08s ease;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.04);
     }
     .meta-btn-menu:active {
-      background: linear-gradient(145deg, #2a2a44 0%, #1e1e34 100%);
-      box-shadow: inset 0 1px 3px rgba(0,0,0,0.5);
-      transform: scale(0.94);
+      background: #181836;
+      transform: scale(0.92);
     }
     .meta-btn-menu-dots {
       display: flex;
       gap: 3px;
     }
     .meta-btn-menu-dot {
-      width: 4px;
-      height: 4px;
+      width: 3px;
+      height: 3px;
       border-radius: 50%;
-      background: linear-gradient(135deg, #14F195 0%, #9945FF 100%);
-      opacity: 0.7;
+      background: rgba(255,255,255,0.2);
     }
 
     .meta-label {
-      color: rgba(255,255,255,0.25);
-      font-size: 8px;
+      color: rgba(255,255,255,0.1);
+      font-size: 7px;
       font-weight: 600;
-      letter-spacing: 1px;
+      letter-spacing: 1.5px;
       text-transform: uppercase;
     }
 
     .center-meta {
       display: flex;
-      gap: 24px;
+      gap: 20px;
       align-items: center;
     }
 
     .retryx-logo {
-      background: linear-gradient(90deg, #14F195, #9945FF);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      font-size: 10px;
-      font-weight: 800;
-      letter-spacing: 3px;
-      opacity: 0.35;
+      color: rgba(255,255,255,0.05);
+      font-size: 8px;
+      font-weight: 700;
+      letter-spacing: 4px;
     }
 
     /* MENU OVERLAY */
     #menu-overlay {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.85);
+      background: rgba(0,0,0,0.75);
       z-index: 50000;
       display: none;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
     }
     #menu-overlay.visible {
       display: flex;
     }
 
     .menu-card {
-      width: 82%;
-      max-width: 320px;
-      background: #1e1e2e;
-      border-radius: 16px;
+      width: 78%;
+      max-width: 300px;
+      background: #141422;
+      border-radius: 14px;
       overflow: hidden;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.6);
-      border: 1px solid rgba(255,255,255,0.08);
+      box-shadow: 0 24px 80px rgba(0,0,0,0.5);
+      border: 1px solid rgba(255,255,255,0.04);
     }
 
     .menu-header {
-      padding: 18px 20px 14px;
-      border-bottom: 1px solid rgba(255,255,255,0.06);
+      padding: 16px 20px 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
       display: flex;
       align-items: center;
       justify-content: space-between;
     }
 
     .menu-title {
-      font-size: 17px;
-      font-weight: 700;
-      color: #eee;
+      font-size: 14px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.8);
       letter-spacing: 0.3px;
     }
 
     .menu-close {
-      width: 30px;
-      height: 30px;
+      width: 26px;
+      height: 26px;
       border-radius: 50%;
-      background: rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.05);
       border: none;
-      color: #999;
-      font-size: 18px;
+      color: rgba(255,255,255,0.3);
+      font-size: 15px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -532,18 +505,18 @@ export function getEmulatorHtml(base64: string, core: string): string {
       -webkit-tap-highlight-color: transparent;
     }
     .menu-close:active {
-      background: rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.1);
     }
 
     .menu-items {
-      padding: 6px 0;
+      padding: 4px 0;
     }
 
     .menu-item {
       display: flex;
       align-items: center;
       gap: 14px;
-      padding: 14px 20px;
+      padding: 13px 20px;
       cursor: pointer;
       -webkit-tap-highlight-color: transparent;
       transition: background 0.1s;
@@ -553,26 +526,15 @@ export function getEmulatorHtml(base64: string, core: string): string {
       text-align: left;
     }
     .menu-item:active {
-      background: rgba(255,255,255,0.06);
+      background: rgba(255,255,255,0.03);
     }
 
-    .menu-icon {
-      width: 36px;
-      height: 36px;
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 18px;
+    .menu-accent {
+      width: 3px;
+      height: 28px;
+      border-radius: 2px;
       flex-shrink: 0;
     }
-
-    .menu-icon-save { background: rgba(16,185,129,0.15); }
-    .menu-icon-load { background: rgba(99,102,241,0.15); }
-    .menu-icon-cheat { background: rgba(245,158,11,0.15); }
-    .menu-icon-audio { background: rgba(236,72,153,0.15); }
-    .menu-icon-fast { background: rgba(59,130,246,0.15); }
-    .menu-icon-reset { background: rgba(239,68,68,0.15); }
 
     .menu-item-text {
       display: flex;
@@ -581,61 +543,61 @@ export function getEmulatorHtml(base64: string, core: string): string {
     }
 
     .menu-item-title {
-      font-size: 15px;
-      font-weight: 600;
-      color: #ddd;
+      font-size: 14px;
+      font-weight: 500;
+      color: rgba(255,255,255,0.75);
     }
 
     .menu-item-sub {
-      font-size: 11px;
-      color: #777;
+      font-size: 10px;
+      color: rgba(255,255,255,0.25);
     }
 
     .menu-sep {
       height: 1px;
-      background: rgba(255,255,255,0.05);
-      margin: 4px 20px;
+      background: rgba(255,255,255,0.03);
+      margin: 2px 20px;
     }
 
     /* CHEAT OVERLAY */
     #cheat-overlay {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.9);
+      background: rgba(0,0,0,0.75);
       z-index: 60000;
       display: none;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
     }
     #cheat-overlay.visible {
       display: flex;
     }
 
     .cheat-card {
-      width: 88%;
-      max-width: 340px;
-      background: #1e1e2e;
-      border-radius: 16px;
+      width: 84%;
+      max-width: 320px;
+      background: #141422;
+      border-radius: 14px;
       overflow: hidden;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.6);
-      border: 1px solid rgba(255,255,255,0.08);
+      box-shadow: 0 24px 80px rgba(0,0,0,0.5);
+      border: 1px solid rgba(255,255,255,0.04);
     }
 
     .cheat-header {
-      padding: 18px 20px 14px;
-      border-bottom: 1px solid rgba(255,255,255,0.06);
+      padding: 16px 20px 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
       display: flex;
       align-items: center;
       justify-content: space-between;
     }
 
     .cheat-title {
-      font-size: 17px;
-      font-weight: 700;
-      color: #eee;
+      font-size: 14px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.8);
     }
 
     .cheat-body {
@@ -643,36 +605,36 @@ export function getEmulatorHtml(base64: string, core: string): string {
     }
 
     .cheat-label {
-      font-size: 12px;
-      color: #888;
+      font-size: 10px;
+      color: rgba(255,255,255,0.3);
       font-weight: 600;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
+      letter-spacing: 1px;
       margin-bottom: 8px;
     }
 
     .cheat-input {
       width: 100%;
       padding: 12px 14px;
-      background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.06);
       border-radius: 10px;
-      color: #eee;
-      font-size: 14px;
+      color: rgba(255,255,255,0.85);
+      font-size: 13px;
       font-family: 'SF Mono', 'Fira Code', monospace;
       outline: none;
       resize: vertical;
       min-height: 80px;
     }
     .cheat-input:focus {
-      border-color: rgba(20, 241, 149, 0.4);
+      border-color: rgba(20, 241, 149, 0.3);
     }
 
     .cheat-hint {
-      font-size: 11px;
-      color: #555;
+      font-size: 10px;
+      color: rgba(255,255,255,0.2);
       margin-top: 8px;
-      line-height: 1.4;
+      line-height: 1.5;
     }
 
     .cheat-actions {
@@ -683,61 +645,61 @@ export function getEmulatorHtml(base64: string, core: string): string {
 
     .cheat-btn {
       flex: 1;
-      padding: 12px;
+      padding: 11px;
       border-radius: 10px;
       border: none;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 600;
       cursor: pointer;
       -webkit-tap-highlight-color: transparent;
     }
 
     .cheat-btn-cancel {
-      background: rgba(255,255,255,0.08);
-      color: #aaa;
+      background: rgba(255,255,255,0.05);
+      color: rgba(255,255,255,0.4);
     }
 
     .cheat-btn-apply {
-      background: linear-gradient(135deg, #14F195 0%, #0bc47a 100%);
-      color: #000;
+      background: #14F195;
+      color: rgba(0,0,0,0.7);
     }
     .cheat-btn-apply:active {
-      background: linear-gradient(135deg, #3DFFA8 0%, #14F195 100%);
+      background: #2fffa3;
     }
 
     /* SLOTS OVERLAY */
     #slots-overlay {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.88);
+      background: rgba(0,0,0,0.75);
       z-index: 55000;
       display: none;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
     }
     #slots-overlay.visible {
       display: flex;
     }
 
     .slots-card {
-      width: 88%;
-      max-width: 340px;
-      background: #1a1a2e;
-      border-radius: 16px;
+      width: 84%;
+      max-width: 320px;
+      background: #141422;
+      border-radius: 14px;
       overflow: hidden;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.7);
-      border: 1px solid rgba(255,255,255,0.08);
+      box-shadow: 0 24px 80px rgba(0,0,0,0.5);
+      border: 1px solid rgba(255,255,255,0.04);
       max-height: 75vh;
       display: flex;
       flex-direction: column;
     }
 
     .slots-header {
-      padding: 18px 20px 14px;
-      border-bottom: 1px solid rgba(255,255,255,0.06);
+      padding: 16px 20px 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -745,14 +707,14 @@ export function getEmulatorHtml(base64: string, core: string): string {
     }
 
     .slots-title {
-      font-size: 17px;
-      font-weight: 700;
-      color: #eee;
+      font-size: 14px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.8);
       letter-spacing: 0.3px;
     }
 
     .slots-body {
-      padding: 8px 0;
+      padding: 4px 0;
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
       flex: 1;
@@ -762,7 +724,7 @@ export function getEmulatorHtml(base64: string, core: string): string {
       display: flex;
       align-items: center;
       gap: 14px;
-      padding: 14px 20px;
+      padding: 12px 20px;
       cursor: pointer;
       -webkit-tap-highlight-color: transparent;
       transition: background 0.1s;
@@ -772,26 +734,24 @@ export function getEmulatorHtml(base64: string, core: string): string {
       text-align: left;
     }
     .slot-item:active {
-      background: rgba(20, 241, 149, 0.08);
+      background: rgba(255,255,255,0.03);
     }
 
     .slot-num {
-      width: 42px;
-      height: 42px;
-      border-radius: 12px;
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 16px;
-      font-weight: 800;
+      font-size: 14px;
+      font-weight: 700;
       flex-shrink: 0;
-      color: #555;
-      background: rgba(255,255,255,0.04);
-      border: 1px solid rgba(255,255,255,0.06);
+      color: rgba(255,255,255,0.2);
+      background: rgba(255,255,255,0.03);
     }
     .slot-num.has-data {
-      background: linear-gradient(135deg, rgba(20,241,149,0.15) 0%, rgba(153,69,255,0.15) 100%);
-      border-color: rgba(20,241,149,0.2);
+      background: rgba(20,241,149,0.08);
       color: #14F195;
     }
 
@@ -804,17 +764,17 @@ export function getEmulatorHtml(base64: string, core: string): string {
     }
 
     .slot-label {
-      font-size: 15px;
-      font-weight: 600;
-      color: #ddd;
+      font-size: 14px;
+      font-weight: 500;
+      color: rgba(255,255,255,0.7);
     }
     .slot-label.empty {
-      color: #555;
+      color: rgba(255,255,255,0.2);
     }
 
     .slot-meta {
-      font-size: 11px;
-      color: #666;
+      font-size: 10px;
+      color: rgba(255,255,255,0.25);
       display: flex;
       gap: 10px;
       flex-wrap: wrap;
@@ -827,26 +787,26 @@ export function getEmulatorHtml(base64: string, core: string): string {
     }
 
     .slot-meta-dot {
-      width: 4px;
-      height: 4px;
+      width: 3px;
+      height: 3px;
       border-radius: 50%;
-      background: #444;
+      background: rgba(255,255,255,0.15);
     }
 
     .slot-arrow {
-      color: #444;
-      font-size: 18px;
+      color: rgba(255,255,255,0.15);
+      font-size: 16px;
       flex-shrink: 0;
     }
 
     .slot-delete {
-      width: 28px;
-      height: 28px;
+      width: 26px;
+      height: 26px;
       border-radius: 50%;
-      background: rgba(239,68,68,0.12);
+      background: rgba(239,68,68,0.08);
       border: none;
-      color: #ef4444;
-      font-size: 14px;
+      color: rgba(239,68,68,0.7);
+      font-size: 13px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -855,7 +815,7 @@ export function getEmulatorHtml(base64: string, core: string): string {
       -webkit-tap-highlight-color: transparent;
     }
     .slot-delete:active {
-      background: rgba(239,68,68,0.25);
+      background: rgba(239,68,68,0.2);
     }
 
     /* TOAST */
@@ -863,21 +823,21 @@ export function getEmulatorHtml(base64: string, core: string): string {
       position: fixed;
       top: 50%;
       left: 50%;
-      transform: translate(-50%, -50%) scale(0.9);
-      background: rgba(0,0,0,0.85);
-      color: #fff;
-      padding: 12px 24px;
-      border-radius: 12px;
-      font-size: 14px;
-      font-weight: 600;
+      transform: translate(-50%, -50%) scale(0.95);
+      background: rgba(20,20,34,0.9);
+      color: rgba(255,255,255,0.85);
+      padding: 10px 22px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 500;
       z-index: 70000;
       opacity: 0;
-      transition: all 0.25s ease;
+      transition: all 0.2s ease;
       pointer-events: none;
       text-align: center;
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border: 1px solid rgba(255,255,255,0.1);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.04);
     }
     #toast.show {
       opacity: 1;
@@ -895,15 +855,15 @@ export function getEmulatorHtml(base64: string, core: string): string {
     #boot-overlay.hidden { opacity: 0; }
     #boot-overlay.gone { display: none; }
     .spinner {
-      width: 36px; height: 36px;
-      border: 2px solid rgba(20, 241, 149, 0.15);
-      border-top-color: rgba(20, 241, 149, 0.8);
+      width: 32px; height: 32px;
+      border: 2px solid rgba(20, 241, 149, 0.1);
+      border-top-color: rgba(20, 241, 149, 0.6);
       border-radius: 50%;
-      animation: spin 0.7s linear infinite;
+      animation: spin 0.8s linear infinite;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
-    .boot-text { margin-top: 16px; color: rgba(255,255,255,0.5); font-size: 14px; font-weight: 500; }
-    .boot-sub { margin-top: 6px; color: rgba(255,255,255,0.25); font-size: 12px; }
+    .boot-text { margin-top: 16px; color: rgba(255,255,255,0.4); font-size: 13px; font-weight: 500; }
+    .boot-sub { margin-top: 6px; color: rgba(255,255,255,0.2); font-size: 11px; }
   </style>
 </head>
 <body>
@@ -974,14 +934,14 @@ export function getEmulatorHtml(base64: string, core: string): string {
       </div>
       <div class="menu-items">
         <div class="menu-item" id="menu-save">
-          <div class="menu-icon menu-icon-save">💾</div>
+          <div class="menu-accent" style="background:#10b981"></div>
           <div class="menu-item-text">
             <div class="menu-item-title">Save State</div>
             <div class="menu-item-sub">Save your current progress</div>
           </div>
         </div>
         <div class="menu-item" id="menu-load">
-          <div class="menu-icon menu-icon-load">📂</div>
+          <div class="menu-accent" style="background:#6366f1"></div>
           <div class="menu-item-text">
             <div class="menu-item-title">Load State</div>
             <div class="menu-item-sub">Restore saved progress</div>
@@ -989,14 +949,14 @@ export function getEmulatorHtml(base64: string, core: string): string {
         </div>
         <div class="menu-sep"></div>
         <div class="menu-item" id="menu-cheat">
-          <div class="menu-icon menu-icon-cheat">⚡</div>
+          <div class="menu-accent" style="background:#f59e0b"></div>
           <div class="menu-item-text">
             <div class="menu-item-title">Cheats</div>
             <div class="menu-item-sub">Enter cheat codes</div>
           </div>
         </div>
         <div class="menu-item" id="menu-audio">
-          <div class="menu-icon menu-icon-audio">🔊</div>
+          <div class="menu-accent" style="background:#ec4899"></div>
           <div class="menu-item-text">
             <div class="menu-item-title" id="audio-label">Mute Audio</div>
             <div class="menu-item-sub" id="audio-sub">Sound is currently on</div>
@@ -1004,14 +964,14 @@ export function getEmulatorHtml(base64: string, core: string): string {
         </div>
         <div class="menu-sep"></div>
         <div class="menu-item" id="menu-fast">
-          <div class="menu-icon menu-icon-fast">⏩</div>
+          <div class="menu-accent" style="background:#3b82f6"></div>
           <div class="menu-item-text">
             <div class="menu-item-title" id="fast-label">Fast Forward</div>
             <div class="menu-item-sub" id="fast-sub">Speed up gameplay</div>
           </div>
         </div>
         <div class="menu-item" id="menu-reset">
-          <div class="menu-icon menu-icon-reset">🔄</div>
+          <div class="menu-accent" style="background:#ef4444"></div>
           <div class="menu-item-text">
             <div class="menu-item-title">Reset Game</div>
             <div class="menu-item-sub">Restart from beginning</div>
