@@ -3,6 +3,7 @@
   "main": "expo-router/entry",
   "version": "1.0.0",
   "scripts": {
+    "postinstall": "patch-package",
     "eas-build-pre-install": "npm config set legacy-peer-deps true",
     "start": "bunx rork start -p bdz76lwrkslm8z9qas7bm --tunnel",
     "start-web": "bunx rork start -p bdz76lwrkslm8z9qas7bm --web --tunnel",
@@ -45,6 +46,8 @@
     "react-native-gesture-handler": "~2.28.0",
     "react-native-safe-area-context": "~5.6.0",
     "react-native-screens": "~4.16.0",
+    "react-native-libretro-view": "file:./packages/react-native-libretro-view",
+    "react-native-static-server": "^0.5.0",
     "react-native-svg": "15.12.1",
     "react-native-web": "^0.21.0",
     "react-native-webview": "13.15.0",
@@ -58,6 +61,7 @@
     "@types/react": "~19.1.10",
     "eslint": "^9.31.0",
     "eslint-config-expo": "~10.0.0",
+    "patch-package": "^8.0.1",
     "typescript": "~5.9.2"
   },
   "private": true

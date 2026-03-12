@@ -9,76 +9,205 @@ import {
   StatusBar,
   Animated,
   Alert,
+  DeviceEventEmitter,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { WebView } from 'react-native-webview';
 
 import { ArrowLeft, AlertTriangle } from 'lucide-react-native';
+
+// Native LibRetro is temporarily disabled in release builds because the native view isn't registering
+// reliably yet (causes a fatal RN error). EmulatorJS path is stable and keeps the app usable.
+const USE_NATIVE_LIBRETRO_ANDROID = false;
+
+const NATIVE_CORES = ['gambatte', 'mgba', 'fceumm', 'snes9x', 'melonds', 'genesis_plus_gx'];
+let LibretroView: React.ComponentType<{ style?: object; romPath: string; coreName: string }> | null = null;
+if (Platform.OS === 'android' && USE_NATIVE_LIBRETRO_ANDROID) {
+  try {
+    LibretroView = require('react-native-libretro-view')?.LibretroView ?? null;
+  } catch {
+    LibretroView = null;
+  }
+}
+import * as FileSystem from 'expo-file-system/legacy';
 import Colors from '@/constants/colors';
 import { useRoms } from '@/contexts/RomContext';
-import { getEmulatorHtml } from '@/utils/emulator-html';
+import { PLATFORM_CORES, PLATFORM_EJS_SYSTEM, EJS_CORE_OVERRIDES, type RomPlatform } from '@/types/rom';
+import { getEmulatorDataPath, ensureEmulatorAsset } from '@/utils/emulator-assets';
+import {
+  getRomServerPath,
+  startEmulatorServer,
+  stopEmulatorServer,
+} from '@/utils/emulator-server';
+import { getEmulatorHtml, getEmulatorHtmlForFileUri } from '@/utils/emulator-html';
 
 export default function EmulatorScreen() {
-  const { romId, romName, core } = useLocalSearchParams<{
+  const { romId, romName, platform } = useLocalSearchParams<{
     romId: string;
     romName: string;
-    core: string;
+    platform: string;
   }>();
+  const core = platform ? PLATFORM_CORES[platform as RomPlatform] : undefined;
+  const ejsSystem = platform
+    ? (EJS_CORE_OVERRIDES[platform as RomPlatform] ?? PLATFORM_EJS_SYSTEM[platform as RomPlatform])
+    : undefined;
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { getRomBase64, updateCoverImage } = useRoms();
+  const { getRomBase64, getRomFileUri, updateCoverImage, isLoading: romsLoading } = useRoms();
 
   const [html, setHtml] = useState<string | null>(null);
+  const [sourceUri, setSourceUri] = useState<string | null>(null);
+  const [useNativeLibretro, setUseNativeLibretro] = useState(false);
+  const [romPathForNative, setRomPathForNative] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [gameStarted, setGameStarted] = useState(false);
+  const [nativeFailed, setNativeFailed] = useState(false);
+  const [webViewReloadKey, setWebViewReloadKey] = useState(0);
   const backButtonOpacity = useRef(new Animated.Value(1)).current;
   const webViewRef = useRef<WebView>(null);
+  const autoFixAttemptsRef = useRef(0);
+  const serverBaseRef = useRef<string | null>(null);
+  const autoFixedUrlsRef = useRef<Set<string>>(new Set());
+
+  // When native LibRetro fails (core missing, init error), fall back to EmulatorJS
+  useEffect(() => {
+    if (Platform.OS !== 'android') return;
+    const sub = DeviceEventEmitter.addListener('LibretroViewError', (ev: { message?: string }) => {
+      console.log('[Emulator] Native LibRetro failed, falling back to EmulatorJS:', ev?.message);
+      setUseNativeLibretro(false);
+      setRomPathForNative(null);
+      setNativeFailed(true);
+      setLoading(true);
+    });
+    return () => sub.remove();
+  }, []);
+
+  // Reset native-failed state when switching ROMs so we retry native for each
+  useEffect(() => {
+    setNativeFailed(false);
+  }, [romId, platform]);
 
   useEffect(() => {
-    if (!romId || !core) {
+    if (!romId || !platform || !ejsSystem) {
       setError('Missing ROM information.');
       setLoading(false);
       return;
     }
+    if (romsLoading) return;
 
     void (async () => {
       try {
         console.log('[Emulator] Loading ROM:', romId);
+        const pathtodata = await getEmulatorDataPath();
+        const isLocalEmulator = pathtodata.startsWith('file://') || pathtodata.startsWith('/');
+
+        if (
+          USE_NATIVE_LIBRETRO_ANDROID &&
+          LibretroView &&
+          !nativeFailed &&
+          Platform.OS === 'android' &&
+          getRomFileUri &&
+          NATIVE_CORES.includes(core)
+        ) {
+          try {
+            const romUri = getRomFileUri(romId);
+            if (romUri) {
+              console.log('[Emulator] Using native Libretro:', core);
+              setRomPathForNative(romUri);
+              setUseNativeLibretro(true);
+              setLoading(false);
+              setGameStarted(true);
+              return;
+            }
+          } catch (nativeErr) {
+            console.log('[Emulator] Native Libretro failed, falling back to EmulatorJS:', nativeErr);
+          }
+        }
+        if (USE_NATIVE_LIBRETRO_ANDROID && !LibretroView && Platform.OS === 'android') {
+          console.log('[Emulator] Native Libretro unavailable (view not registered), using EmulatorJS.');
+        }
+
+        // Delta-style: no ROM size limit. On Android, serve ROM from local server (file URL in HTML, no Binder).
+        if (Platform.OS !== 'web' && getRomFileUri) {
+          try {
+            const romUri = getRomFileUri(romId);
+            if (romUri) {
+              const serverUrl = await startEmulatorServer();
+              if (serverUrl) {
+                const romServerPath = getRomServerPath(romUri);
+                const romUrl = serverUrl + romServerPath;
+                // Always serve EmulatorJS assets locally from the same server origin.
+                // This avoids EmulatorJS showing "network error" if it falls back to CDN or is offline.
+                const dataPath = serverUrl + 'emulatorjs/';
+                const emulatorHtml = getEmulatorHtmlForFileUri(romUrl, ejsSystem, romId, {
+                  pathtodata: dataPath,
+                });
+                const htmlPath = (FileSystem.documentDirectory ?? '') + 'emulator.html';
+                await FileSystem.writeAsStringAsync(htmlPath, emulatorHtml, {
+                  encoding: FileSystem.EncodingType.UTF8,
+                });
+                serverBaseRef.current = serverUrl.replace(/\/$/, '');
+                autoFixAttemptsRef.current = 0;
+                autoFixedUrlsRef.current = new Set();
+                setSourceUri(serverUrl + 'emulator.html');
+                setHtml(null);
+                return;
+              }
+            }
+          } catch (fileErr) {
+            console.log('[Emulator] Server-based load failed, falling back to base64:', fileErr);
+          }
+        }
+
         const base64 = await getRomBase64(romId);
         if (!base64) {
           setError('ROM data not available.');
           setLoading(false);
           return;
         }
-        // Rough estimate: base64 is ~4/3 of the original binary size.
-        const approxBytes = base64.length * 0.75;
-        console.log('[Emulator] ROM loaded, approx size:', approxBytes, 'bytes');
 
-        // Soft safety guard: allow up to ~1GB on native before we give up.
-        // Note: pushing this high increases the risk of WebView/OS OOM crashes,
-        // but this matches the requested behavior.
-        const ONE_GB = 1024 * 1024 * 1024;
-        if (Platform.OS !== 'web' && approxBytes > ONE_GB) {
-          console.log('[Emulator] ROM exceeds 1GB guard on Android');
-          setError('This ROM file is larger than 1GB and cannot be loaded.');
+        // Fallback: inline base64 (web, or server failed on Android). Android Binder limit ~1MB.
+        const base64Size = base64.length * 0.75;
+        const BASE64_MAX = 2.5 * 1024 * 1024;
+        if (Platform.OS === 'android' && base64Size > BASE64_MAX) {
+          setError(
+            "Emulator server couldn't start. Try again or restart the app. (Large ROMs need the server.)"
+          );
           setLoading(false);
           return;
         }
 
-        const emulatorHtml = getEmulatorHtml(base64, core, romId);
+        console.log('[Emulator] ROM loaded, size:', base64.length, 'bytes base64');
+        const pathtodataForBase64 = 'https://cdn.emulatorjs.org/stable/data/';
+        const emulatorHtml = getEmulatorHtml(base64, ejsSystem, romId, {
+          pathtodata: pathtodataForBase64,
+        });
         setHtml(emulatorHtml);
+        setSourceUri(null);
       } catch (err) {
         console.log('[Emulator] Error loading ROM:', err);
-        setError('Failed to load ROM. The file may have been deleted.');
+        const msg = err instanceof Error ? err.message : 'Unknown error';
+        const friendly = msg.includes('need WiFi') || msg.includes('Cannot download')
+          ? 'First-time setup needs internet. Connect and try again.'
+          : msg.includes('not found')
+          ? 'ROM not found. It may have been deleted or not yet loaded.'
+          : 'Failed to load ROM. The file may have been deleted.';
+        setError(friendly);
         setLoading(false);
       }
     })();
-  }, [romId, core, getRomBase64]);
+  }, [romId, platform, ejsSystem, core, romsLoading, nativeFailed, getRomBase64, getRomFileUri]);
 
   useEffect(() => {
-    if (!html) return;
+    return () => {
+      if (Platform.OS !== 'web') void stopEmulatorServer();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!html && !sourceUri) return;
     const timeout = setTimeout(() => {
       if (loading && !gameStarted) {
         console.log('[Emulator] Timeout fallback - dismissing loading overlay');
@@ -87,7 +216,7 @@ export default function EmulatorScreen() {
       }
     }, 15000);
     return () => clearTimeout(timeout);
-  }, [html, loading, gameStarted]);
+  }, [html, sourceUri, loading, gameStarted]);
 
   useEffect(() => {
     if (Platform.OS !== 'web') return;
@@ -133,6 +262,47 @@ export default function EmulatorScreen() {
       } else if (data.type === 'error') {
         console.log('[Emulator] Emulator error:', data.message);
         setError(data.message ?? 'Emulator encountered an error.');
+        setLoading(false);
+      } else if (data.type === 'fetchError') {
+        const detail = data.url ? `${data.status ?? ''} ${data.url}`.trim() : (data.message ?? 'Fetch failed');
+        console.log('[Emulator] Emulator fetch failed:', detail);
+
+        const url: string | undefined = data.url;
+        const status: number | undefined = data.status;
+        const serverBase = serverBaseRef.current;
+
+        if (
+          Platform.OS === 'android' &&
+          status === 404 &&
+          url &&
+          serverBase &&
+          url.startsWith(serverBase) &&
+          url.includes('/emulatorjs/')
+        ) {
+          const idx = url.indexOf('/emulatorjs/');
+          const relPath = url.slice(idx + '/emulatorjs/'.length);
+          const key = `${status} ${relPath}`;
+
+          if (!autoFixedUrlsRef.current.has(key) && autoFixAttemptsRef.current < 5) {
+            autoFixedUrlsRef.current.add(key);
+            autoFixAttemptsRef.current += 1;
+            console.log('[Emulator] Auto-fixing missing asset:', relPath);
+            setLoading(true);
+            void (async () => {
+              try {
+                await ensureEmulatorAsset(relPath);
+                setWebViewReloadKey((k) => k + 1);
+              } catch (e) {
+                const msg = e instanceof Error ? e.message : String(e);
+                setError(`Cannot download emulator (need WiFi). Failed: ${relPath} (${msg})`);
+                setLoading(false);
+              }
+            })();
+            return;
+          }
+        }
+
+        setError(`Network error loading emulator files: ${detail}`);
         setLoading(false);
       }
     } catch {
@@ -181,10 +351,16 @@ export default function EmulatorScreen() {
     <View style={styles.container}>
       <StatusBar hidden />
 
-      {html ? (
+      {useNativeLibretro && LibretroView && romPathForNative && core ? (
+        <LibretroView
+          style={styles.nativeView}
+          romPath={romPathForNative}
+          coreName={core}
+        />
+      ) : html || sourceUri ? (
         Platform.OS === 'web' ? (
           <iframe
-            srcDoc={html}
+            srcDoc={html ?? ''}
             style={{ flex: 1, width: '100%', height: '100%', border: 'none', backgroundColor: '#000' } as any}
             allow="autoplay; fullscreen"
             sandbox="allow-scripts allow-same-origin allow-popups"
@@ -194,8 +370,9 @@ export default function EmulatorScreen() {
           />
         ) : (
           <WebView
+            key={webViewReloadKey}
             ref={webViewRef}
-            source={{ html }}
+            source={sourceUri ? { uri: sourceUri } : { html: html! }}
             style={styles.webview}
             javaScriptEnabled
             domStorageEnabled
@@ -207,16 +384,26 @@ export default function EmulatorScreen() {
             }}
             onError={(e) => {
               console.log('[Emulator] WebView error:', e.nativeEvent.description);
-              setError('Emulator failed to load. Check your internet connection.');
+              setError(
+                'Emulator failed to load. Connect to Wi‑Fi (needed for first load) and try again.'
+              );
             }}
-            originWhitelist={['*']}
+            onHttpError={(e) => {
+              console.log('[Emulator] WebView HTTP error:', e.nativeEvent.statusCode, e.nativeEvent.url);
+            }}
+            originWhitelist={['*', 'file://*', 'http://127.0.0.1:*', 'http://localhost:*', 'https://*']}
             allowsFullscreenVideo
             scrollEnabled={false}
             bounces={false}
             overScrollMode="never"
+            allowFileAccess
             allowFileAccessFromFileURLs
             allowUniversalAccessFromFileURLs
             mixedContentMode="always"
+            cacheEnabled
+            setSupportMultipleWindows={false}
+            androidLayerType="hardware"
+            androidHardwareAccelerationDisabled={false}
           />
         )
       ) : null}
@@ -227,7 +414,7 @@ export default function EmulatorScreen() {
             <ActivityIndicator size="large" color={Colors.primary} />
             <Text style={styles.loadingTitle}>{romName ?? 'Loading'}</Text>
             <Text style={styles.loadingSubtitle}>
-              {html ? 'Starting emulator...' : 'Reading ROM file...'}
+              {html || sourceUri ? 'Starting emulator...' : 'Reading ROM file...'}
             </Text>
           </View>
         </View>
@@ -259,6 +446,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#000',
   },
   webview: {
+    flex: 1,
+    backgroundColor: '#000',
+  },
+  nativeView: {
     flex: 1,
     backgroundColor: '#000',
   },

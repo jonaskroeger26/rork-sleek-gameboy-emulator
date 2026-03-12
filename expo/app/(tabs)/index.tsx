@@ -16,7 +16,7 @@ import { Plus, Gamepad2 } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import Colors from '@/constants/colors';
 import { useRoms } from '@/contexts/RomContext';
-import { Rom, PLATFORM_CORES } from '@/types/rom';
+import { Rom } from '@/types/rom';
 import RomCard from '@/components/RomCard';
 import EmptyLibrary from '@/components/EmptyLibrary';
 
@@ -42,11 +42,10 @@ export default function LibraryScreen() {
       }
 
       await updateLastPlayed(rom.id);
-      const core = PLATFORM_CORES[rom.platform];
 
       router.push({
         pathname: '/emulator',
-        params: { romId: rom.id, romName: rom.name, core, base64Length: base64.length.toString() },
+        params: { romId: rom.id, romName: rom.name, platform: rom.platform, base64Length: base64.length.toString() },
       });
 
       setTimeout(() => setLaunching(null), 1000);

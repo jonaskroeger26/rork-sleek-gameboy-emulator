@@ -1,0 +1,27 @@
+{
+  "name": "react-native-libretro-view",
+  "version": "1.0.0",
+  "description": "Native LibRetro emulator view for React Native - Delta-style file-based ROM loading",
+  "main": "index.js",
+  "scripts": {
+    "download-cores": "node scripts/download-cores.js"
+  },
+  "keywords": [
+    "react-native",
+    "libretro",
+    "emulator",
+    "gambatte",
+    "gba"
+  ],
+  "author": "",
+  "license": "GPL-3.0",
+  "peerDependencies": {
+    "react-native": "*"
+  },
+  "devDependencies": {
+    "react-native": "*"
+  },
+  "dependencies": {
+    "adm-zip": "^0.5.16"
+  }
+}

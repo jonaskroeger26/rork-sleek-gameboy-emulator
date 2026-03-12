@@ -60,30 +60,34 @@ async function fetchBoxArt(romName: string, platform: RomPlatform): Promise<stri
 const copyRomToStorage = async (sourceUri: string, fileName: string): Promise<string> => {
   if (Platform.OS === 'web') return sourceUri;
 
-  const { File, Directory, Paths } = require('expo-file-system') as typeof import('expo-file-system');
-  const romsDir = new Directory(Paths.document, 'roms');
-  if (!romsDir.exists) {
-    romsDir.create({ intermediates: true });
+  const FileSystem = require('expo-file-system/legacy');
+  const docDir = FileSystem.documentDirectory;
+  if (!docDir) throw new Error('No document directory');
+  const romsDir = docDir + 'roms/';
+  const dirInfo = await FileSystem.getInfoAsync(romsDir, { type: 'dir' });
+  if (!dirInfo.exists) {
+    await FileSystem.makeDirectoryAsync(romsDir, { intermediates: true });
   }
   const uniqueName = `${Date.now()}_${fileName}`;
-  const destFile = new File(romsDir, uniqueName);
-  const sourceFile = new File(sourceUri);
-  sourceFile.copy(destFile);
-  console.log('[RomContext] Copied ROM to:', destFile.uri);
-  return destFile.uri;
+  const destUri = romsDir + uniqueName;
+  await FileSystem.copyAsync({ from: sourceUri, to: destUri });
+  console.log('[RomContext] Copied ROM to:', destUri);
+  return destUri;
 };
 
 const readFileBase64 = async (fileUri: string): Promise<string> => {
-  const { File } = require('expo-file-system') as typeof import('expo-file-system');
-  const file = new File(fileUri);
-  return await file.base64();
+  const FileSystem = require('expo-file-system/legacy');
+  const content = await FileSystem.readAsStringAsync(fileUri, {
+    encoding: FileSystem.EncodingType.Base64,
+  });
+  return content;
 };
 
-const removeFile = (fileUri: string): void => {
+const removeFile = async (fileUri: string): Promise<void> => {
   try {
-    const { File } = require('expo-file-system') as typeof import('expo-file-system');
-    const file = new File(fileUri);
-    if (file.exists) file.delete();
+    const FileSystem = require('expo-file-system/legacy');
+    const info = await FileSystem.getInfoAsync(fileUri);
+    if (info.exists) await FileSystem.deleteAsync(fileUri);
   } catch (e) {
     console.log('[RomContext] Failed to delete file:', e);
   }
@@ -104,15 +108,16 @@ export const [RomProvider, useRoms] = createContextHook(() => {
         if (stored) {
           const parsed: Rom[] = JSON.parse(stored);
           if (Platform.OS !== 'web') {
-            const { File } = require('expo-file-system') as typeof import('expo-file-system');
-            const valid = parsed.filter(r => {
+            const FileSystem = require('expo-file-system/legacy');
+            const valid: Rom[] = [];
+            for (const r of parsed) {
               try {
-                const f = new File(r.fileUri);
-                return f.exists;
+                const info = await FileSystem.getInfoAsync(r.fileUri);
+                if (info.exists) valid.push(r);
               } catch {
-                return false;
+                // skip
               }
-            });
+            }
             setRoms(valid);
             if (valid.length !== parsed.length) {
               await AsyncStorage.setItem(ROMS_STORAGE_KEY, JSON.stringify(valid));
@@ -241,7 +246,7 @@ export const [RomProvider, useRoms] = createContextHook(() => {
     if (!rom) return;
 
     if (Platform.OS !== 'web') {
-      removeFile(rom.fileUri);
+      await removeFile(rom.fileUri);
     } else {
       webRomCache.delete(id);
     }
@@ -254,7 +259,7 @@ export const [RomProvider, useRoms] = createContextHook(() => {
   const clearAllRoms = useCallback(async () => {
     if (Platform.OS !== 'web') {
       for (const rom of roms) {
-        removeFile(rom.fileUri);
+        await removeFile(rom.fileUri);
       }
     } else {
       webRomCache.clear();
@@ -276,6 +281,12 @@ export const [RomProvider, useRoms] = createContextHook(() => {
     if (cached) return cached;
 
     throw new Error('ROM data not available. Please re-import the ROM.');
+  }, [roms]);
+
+  const getRomFileUri = useCallback((id: string): string => {
+    const rom = roms.find(r => r.id === id);
+    if (!rom) throw new Error('ROM not found');
+    return rom.fileUri;
   }, [roms]);
 
   const updateLastPlayed = useCallback(async (id: string) => {
@@ -329,7 +340,8 @@ export const [RomProvider, useRoms] = createContextHook(() => {
     deleteRom,
     clearAllRoms,
     getRomBase64,
+    getRomFileUri,
     updateLastPlayed,
     updateCoverImage,
-  }), [roms, isLoading, importRom, deleteRom, clearAllRoms, getRomBase64, updateLastPlayed, updateCoverImage]);
+  }), [roms, isLoading, importRom, deleteRom, clearAllRoms, getRomBase64, getRomFileUri, updateLastPlayed, updateCoverImage]);
 });

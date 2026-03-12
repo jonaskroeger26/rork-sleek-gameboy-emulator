@@ -36,11 +36,28 @@ export const PLATFORM_CORES: Record<RomPlatform, string> = {
   gb: 'gambatte',
   gbc: 'gambatte',
   gba: 'mgba',
-  nes: 'nes',
+  nes: 'fceumm',
   snes: 'snes9x',
   n64: 'mupen64plus_next',
   nds: 'melonds',
   segaMD: 'genesis_plus_gx',
+};
+
+/** EmulatorJS system IDs / core names - use these for WebView/EmulatorJS */
+export const PLATFORM_EJS_SYSTEM: Record<RomPlatform, string> = {
+  gb: 'gb',
+  gbc: 'gb',
+  gba: 'gba',
+  nes: 'nes',
+  snes: 'snes',
+  n64: 'n64',
+  nds: 'nds',
+  segaMD: 'segaMD',
+};
+
+/** EmulatorJS core overrides - use when default core has issues (e.g. DS needs BIOS for melonds) */
+export const EJS_CORE_OVERRIDES: Partial<Record<RomPlatform, string>> = {
+  nds: 'desmume2015', // melonds requires BIOS; desmume2015 often works without
 };
 
 export const SUPPORTED_EXTENSIONS = [

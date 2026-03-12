@@ -1,5 +1,22 @@
-export function getEmulatorHtml(base64: string, core: string, romId?: string): string {
+const DEFAULT_PATHTODATA = 'https://cdn.emulatorjs.org/stable/data/';
+
+export type EmulatorHtmlOptions = {
+  pathtodata?: string;
+};
+
+export function getEmulatorHtml(base64: string, core: string, romId?: string, opts?: EmulatorHtmlOptions): string {
+  const pathtodata = opts?.pathtodata ?? DEFAULT_PATHTODATA;
   const cleanBase64 = base64.replace(/data:[^;]+;base64,/g, '').replace(/[\r\n\s]/g, '');
+  const coreLower = core.toLowerCase();
+  const isDs = coreLower === 'nds' || coreLower.includes('desmume') || coreLower.includes('melonds');
+  const isGbFamily = coreLower === 'gambatte';
+  const isGba = coreLower === 'mgba';
+  const isNes = coreLower === 'fceumm';
+  const isSnes = coreLower === 'snes9x';
+  const isN64 = coreLower.includes('mupen64');
+  const isSega = coreLower.includes('genesis_plus_gx');
+  const hasXY = isSnes || isN64 || isDs || isSega;
+  const hasShoulders = isGba || isSnes || isN64 || isDs || isSega;
 
   return `<!DOCTYPE html>
 <html>
@@ -10,7 +27,7 @@ export function getEmulatorHtml(base64: string, core: string, romId?: string): s
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body {
       width: 100%; height: 100%;
-      overflow: hidden; background: #000;
+      overflow: hidden; background: ${isDs ? '#f5f5f5' : '#000'};
       touch-action: none;
       -webkit-user-select: none;
       user-select: none;
@@ -21,19 +38,20 @@ export function getEmulatorHtml(base64: string, core: string, romId?: string): s
 
     #top-bar {
       width: 100%;
-      flex: 0 0 8%;
-      background: #000;
+      flex: 0 0 ${isDs ? '4%' : '8%'};
+      background: ${isDs ? '#f5f5f5' : '#000'};
     }
 
     #screen-area {
       width: 100%;
-      flex: 0 0 40%;
-      background: #000;
+      flex: 0 0 ${isDs ? '72%' : '40%'};
+      background: ${isDs ? '#f5f5f5' : '#000'};
       display: flex;
       align-items: center;
       justify-content: center;
       position: relative;
       overflow: hidden;
+      ${isDs ? 'padding: 8px 12px 6px;' : ''}
     }
 
     #game {
@@ -41,7 +59,8 @@ export function getEmulatorHtml(base64: string, core: string, romId?: string): s
       height: 100%;
       position: relative;
       overflow: hidden;
-      background: #000;
+      background: ${isDs ? '#ffffff' : '#000'};
+      ${isDs ? 'display:flex;flex-direction:column;align-items:stretch;justify-content:center;gap:4px;border-radius:18px;box-shadow:0 0 0 1px rgba(0,0,0,0.08);' : ''}
     }
 
     #game > div,
@@ -78,6 +97,44 @@ export function getEmulatorHtml(base64: string, core: string, romId?: string): s
       transform-origin: center center !important;
     }
 
+    ${isDs ? `
+    /* Nintendo DS: show both screens stacked (Delta-like). Many EmulatorJS DS cores render multiple canvases;
+       don't absolute-position or hide them. */
+    #game > div,
+    #game > div > div,
+    #game > div > div > div {
+      position: relative !important;
+      top: auto !important;
+      left: auto !important;
+      right: auto !important;
+      bottom: auto !important;
+    }
+    #game canvas {
+      position: relative !important;
+      top: auto !important;
+      left: auto !important;
+      right: auto !important;
+      bottom: auto !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      height: auto !important;
+      object-fit: contain !important;
+      image-rendering: pixelated;
+    }
+
+    /* If we can detect top/bottom canvases, size them like Delta (top larger). */
+    #game canvas.ds-top {
+      flex: 0 0 62%;
+      height: 62% !important;
+      max-height: 62% !important;
+    }
+    #game canvas.ds-bottom {
+      flex: 0 0 38%;
+      height: 38% !important;
+      max-height: 38% !important;
+    }
+    ` : ''}
+
     .ejs--bar,
     .ejs_menu_bar,
     .ejs_menu_bar_hidden,
@@ -106,24 +163,25 @@ export function getEmulatorHtml(base64: string, core: string, romId?: string): s
       height: 0 !important;
     }
 
+    ${isDs ? '' : `
     #game > div > div:not(:first-child) {
       display: none !important;
-    }
+    }`}
 
     #controls-area {
       width: 100%;
-      flex: 1 1 auto;
-      background: linear-gradient(175deg, #0f0f1a 0%, #0a0a14 45%, #0d0b1e 100%);
+      flex: ${isDs ? '0 0 24%' : '1 1 auto'};
+      background: ${isDs ? '#f5f5f5' : 'linear-gradient(175deg, #0f0f1a 0%, #0a0a14 45%, #0d0b1e 100%)'};
       position: relative;
       display: flex;
       flex-direction: column;
       flex-shrink: 0;
-      border-top: 1px solid rgba(20, 241, 149, 0.12);
+      border-top: ${isDs ? 'none' : '1px solid rgba(20, 241, 149, 0.12)'};
     }
 
     .shoulder-row {
       width: 100%;
-      display: flex;
+      display: ${hasShoulders ? 'flex' : 'none'};
       justify-content: space-between;
       align-items: flex-start;
       padding: 0;
@@ -320,8 +378,8 @@ export function getEmulatorHtml(base64: string, core: string, romId?: string): s
 
     .ab-container {
       position: relative;
-      width: 136px;
-      height: 136px;
+      width: 150px;
+      height: 150px;
     }
 
     .action-btn {
@@ -345,8 +403,8 @@ export function getEmulatorHtml(base64: string, core: string, romId?: string): s
     }
 
     .btn-a {
-      right: 0;
-      top: 6px;
+      right: 6px;
+      top: 56px;
       background: linear-gradient(160deg, #a85cff 0%, #7B2FE0 100%);
       color: rgba(255,255,255,0.9);
       box-shadow: 0 5px 0 #5a1fb8, 0 8px 16px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.15);
@@ -359,7 +417,7 @@ export function getEmulatorHtml(base64: string, core: string, romId?: string): s
     }
 
     .btn-b {
-      left: 14px;
+      left: 44px;
       bottom: 6px;
       background: linear-gradient(160deg, #2bffaa 0%, #0bc47a 100%);
       color: rgba(0,0,0,0.6);
@@ -369,6 +427,36 @@ export function getEmulatorHtml(base64: string, core: string, romId?: string): s
     .btn-b:active, .btn-b.pressed {
       background: linear-gradient(160deg, #14F195 0%, #0aaf6a 100%);
       box-shadow: 0 2px 0 #078c55, 0 4px 8px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.12);
+      transform: scale(0.96) translateY(3px);
+    }
+
+    .btn-x {
+      right: 44px;
+      top: 6px;
+      background: linear-gradient(160deg, #4ade80 0%, #22c55e 100%);
+      color: rgba(0,0,0,0.6);
+      box-shadow: 0 5px 0 #15803d, 0 8px 16px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.18);
+      border: none;
+      display: ${hasXY ? 'flex' : 'none'};
+    }
+    .btn-x:active, .btn-x.pressed {
+      background: linear-gradient(160deg, #22c55e 0%, #16a34a 100%);
+      box-shadow: 0 2px 0 #15803d, 0 4px 8px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.12);
+      transform: scale(0.96) translateY(3px);
+    }
+
+    .btn-y {
+      left: 6px;
+      bottom: 56px;
+      background: linear-gradient(160deg, #60a5fa 0%, #3b82f6 100%);
+      color: rgba(255,255,255,0.9);
+      box-shadow: 0 5px 0 #1d4ed8, 0 8px 16px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.15);
+      border: none;
+      display: ${hasXY ? 'flex' : 'none'};
+    }
+    .btn-y:active, .btn-y.pressed {
+      background: linear-gradient(160deg, #3b82f6 0%, #2563eb 100%);
+      box-shadow: 0 2px 0 #1d4ed8, 0 4px 8px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1);
       transform: scale(0.96) translateY(3px);
     }
 
@@ -840,6 +928,44 @@ export function getEmulatorHtml(base64: string, core: string, romId?: string): s
       background: rgba(239,68,68,0.2);
     }
 
+    /* DS-specific shell + controls: mimic simple white DS look */
+    .ds-layout #controls-area {
+      background: #f5f5f5;
+      border-top: none;
+    }
+    .ds-layout .shoulder-btn {
+      background: #f5f5f5;
+      color: #999;
+      border: 1px solid rgba(0,0,0,0.06);
+      box-shadow: none;
+      font-weight: 500;
+      letter-spacing: 2px;
+    }
+    .ds-layout .shoulder-label {
+      color: #bbb;
+    }
+    .ds-layout .dpad-cross-h,
+    .ds-layout .dpad-cross-v {
+      background: #f5f5f5;
+      border: 1px solid rgba(0,0,0,0.06);
+      box-shadow: none;
+    }
+    .ds-layout .dpad-center-circle {
+      background: #e5e5e5;
+      box-shadow: none;
+    }
+    .ds-layout .action-btn {
+      background: #f5f5f5;
+      color: #555;
+      border: 1px solid rgba(0,0,0,0.08);
+      box-shadow: 0 2px 0 rgba(0,0,0,0.18);
+    }
+    .ds-layout .action-btn:active,
+    .ds-layout .action-btn.pressed {
+      transform: translateY(2px);
+      box-shadow: 0 0 0 1px rgba(0,0,0,0.12);
+    }
+
     /* TOAST */
     #toast {
       position: fixed;
@@ -888,7 +1014,7 @@ export function getEmulatorHtml(base64: string, core: string, romId?: string): s
     .boot-sub { margin-top: 6px; color: rgba(255,255,255,0.2); font-size: 11px; }
   </style>
 </head>
-<body>
+<body${isDs ? ' class="ds-layout"' : ''}>
   <div id="boot-overlay">
     <div class="spinner"></div>
     <div class="boot-text" id="boot-text">Initializing Emulator</div>
@@ -923,6 +1049,8 @@ export function getEmulatorHtml(base64: string, core: string, romId?: string): s
       </div>
 
       <div class="ab-container">
+        <div class="action-btn btn-x" id="btn-x" data-key="x">X</div>
+        <div class="action-btn btn-y" id="btn-y" data-key="y">Y</div>
         <div class="action-btn btn-a" id="btn-a" data-key="a">A</div>
         <div class="action-btn btn-b" id="btn-b" data-key="b">B</div>
       </div>
@@ -1052,6 +1180,8 @@ export function getEmulatorHtml(base64: string, core: string, romId?: string): s
         right:  { key: 'ArrowRight', code: 'ArrowRight', keyCode: 39 },
         a:      { key: 'z',          code: 'KeyZ',       keyCode: 90 },
         b:      { key: 'x',          code: 'KeyX',       keyCode: 88 },
+        x:      { key: 's',          code: 'KeyS',       keyCode: 83 },
+        y:      { key: 'a',          code: 'KeyA',       keyCode: 65 },
         start:  { key: 'Enter',      code: 'Enter',      keyCode: 13 },
         select: { key: 'Shift',      code: 'ShiftLeft',  keyCode: 16 },
         l:      { key: 'q',          code: 'KeyQ',       keyCode: 81 },
@@ -1798,11 +1928,13 @@ export function getEmulatorHtml(base64: string, core: string, romId?: string): s
           '[class*="ejs--bar"],[class*="ejs_menu"]{',
           '  display:none!important;pointer-events:none!important;',
           '  visibility:hidden!important;width:0!important;height:0!important}',
-          '#game>div>div:not(:first-child){display:none!important}',
+          ${isDs ? "''" : "'#game>div>div:not(:first-child){display:none!important}'"},
           '#game canvas,#game>div,#game>div>div,#game>div>div>div{',
           '  transform:none!important;-webkit-transform:none!important;',
           '  transform-origin:center center!important}',
-          '#game canvas{width:100%!important;height:100%!important;object-fit:contain!important}'
+          ${isDs
+            ? "'#game canvas{width:100%!important;max-width:100%!important;object-fit:contain!important;position:relative!important;top:auto!important;left:auto!important;right:auto!important;bottom:auto!important}'"
+            : "'#game canvas{width:100%!important;height:100%!important;object-fit:contain!important}'"}
         ].join('');
         document.head.appendChild(style);
       }
@@ -1826,6 +1958,83 @@ export function getEmulatorHtml(base64: string, core: string, romId?: string): s
         sendMessage('error', { message: msg });
       }
 
+      // Help debug "network error" / black screen by reporting failed fetches to React Native.
+      (function() {
+        try {
+          if (!window.fetch) return;
+          var origFetch = window.fetch.bind(window);
+          window.fetch = function() {
+            return origFetch.apply(null, arguments).then(function(res) {
+              try {
+                if (res && !res.ok) {
+                  sendMessage('fetchError', { url: res.url, status: res.status });
+                }
+              } catch(e) {}
+              return res;
+            }).catch(function(err) {
+              try {
+                sendMessage('fetchError', { message: String(err && (err.message || err)) });
+              } catch(e) {}
+              throw err;
+            });
+          };
+        } catch(e) {}
+      })();
+
+      // Some EmulatorJS builds use XMLHttpRequest; capture those failures too.
+      (function() {
+        try {
+          if (!window.XMLHttpRequest) return;
+          var OrigXHR = window.XMLHttpRequest;
+          function PatchedXHR() {
+            var xhr = new OrigXHR();
+            var _url = '';
+            var _method = '';
+            var origOpen = xhr.open;
+            xhr.open = function(method, url) {
+              _method = method;
+              _url = url;
+              return origOpen.apply(xhr, arguments);
+            };
+            xhr.addEventListener('load', function() {
+              try {
+                if (xhr.status && xhr.status >= 400) {
+                  sendMessage('fetchError', { url: _url, status: xhr.status, method: _method });
+                }
+              } catch(e) {}
+            });
+            xhr.addEventListener('error', function() {
+              try {
+                sendMessage('fetchError', { url: _url, message: 'XHR error', method: _method });
+              } catch(e) {}
+            });
+            return xhr;
+          }
+          window.XMLHttpRequest = PatchedXHR;
+        } catch(e) {}
+      })();
+
+      // Catch generic script/resource errors + promise rejections.
+      (function() {
+        try {
+          window.addEventListener('error', function(ev) {
+            try {
+              var t = ev && ev.target;
+              var src = (t && (t.src || t.href)) || '';
+              if (src) {
+                sendMessage('fetchError', { url: String(src), message: 'Resource load error' });
+              }
+            } catch(e) {}
+          }, true);
+          window.addEventListener('unhandledrejection', function(ev) {
+            try {
+              var r = ev && ev.reason;
+              sendMessage('fetchError', { message: String(r && (r.message || r)) });
+            } catch(e) {}
+          });
+        } catch(e) {}
+      })();
+
       try {
         updateStatus('Initializing Emulator', 'Decoding ROM data...');
 
@@ -1848,7 +2057,7 @@ export function getEmulatorHtml(base64: string, core: string, romId?: string): s
         window.EJS_player = '#game';
         window.EJS_core = '${core}';
         window.EJS_gameUrl = romUrl;
-        window.EJS_pathtodata = 'https://cdn.emulatorjs.org/stable/data/';
+        window.EJS_pathtodata = '${pathtodata.replace(/'/g, "\\'")}';
         window.EJS_color = '#14F195';
         window.EJS_backgroundColor = '#000';
         window.EJS_startOnLoaded = true;
@@ -1946,12 +2155,35 @@ export function getEmulatorHtml(base64: string, core: string, romId?: string): s
               if (ctx) {
                 console.log('[EmuHTML] Active canvas detected');
                 clearInterval(pollInterval);
+                ${isDs ? `
+                try {
+                  // DS: tag first two canvases so CSS can size them (top larger than bottom).
+                  var canvases = Array.prototype.slice.call(document.querySelectorAll('#game canvas'));
+                  if (canvases && canvases.length >= 2) {
+                    canvases.forEach(function(c){ c.classList.remove('ds-top'); c.classList.remove('ds-bottom'); });
+                    canvases[0].classList.add('ds-top');
+                    canvases[1].classList.add('ds-bottom');
+                    console.log('[EmuHTML] DS layout applied. canvases:', canvases.length);
+                  }
+                } catch(e) { console.log('[EmuHTML] DS layout error:', e); }
+                ` : ''}
                 setTimeout(dismissOverlay, 800);
                 return;
               }
             } catch(e) {}
             console.log('[EmuHTML] Canvas element found');
             clearInterval(pollInterval);
+            ${isDs ? `
+            try {
+              var canvases2 = Array.prototype.slice.call(document.querySelectorAll('#game canvas'));
+              if (canvases2 && canvases2.length >= 2) {
+                canvases2.forEach(function(c){ c.classList.remove('ds-top'); c.classList.remove('ds-bottom'); });
+                canvases2[0].classList.add('ds-top');
+                canvases2[1].classList.add('ds-bottom');
+                console.log('[EmuHTML] DS layout applied. canvases:', canvases2.length);
+              }
+            } catch(e) {}
+            ` : ''}
             setTimeout(dismissOverlay, 1500);
             return;
           }
@@ -1964,7 +2196,7 @@ export function getEmulatorHtml(base64: string, core: string, romId?: string): s
         }, 500);
 
         var script = document.createElement('script');
-        script.src = 'https://cdn.emulatorjs.org/stable/data/loader.js';
+        script.src = '${pathtodata.replace(/'/g, "\\'")}loader.js';
         script.onload = function() {
           console.log('[EmuHTML] EmulatorJS loader loaded');
           updateStatus('Emulator Loaded', 'Starting game...');
@@ -1995,4 +2227,13 @@ export function getEmulatorHtml(base64: string, core: string, romId?: string): s
   </script>
 </body>
 </html>`;
+}
+
+/** Native (Android/iOS): use file URI instead of inlining ROM. Avoids OOM and black screens. Fully offline when pathtodata is local. */
+export function getEmulatorHtmlForFileUri(romUri: string, core: string, romId?: string, opts?: EmulatorHtmlOptions): string {
+  const romUrlJs = JSON.stringify(romUri);
+  return getEmulatorHtml('', core, romId, opts).replace(
+    /updateStatus\('Initializing Emulator', 'Decoding ROM data\.\.\.'\);\s*\n\s*var b64 = "[^"]*";[\s\S]*?updateStatus\('Loading Emulator', 'Downloading core files\.\.\.'\);/,
+    `updateStatus('Loading Emulator', 'Using ROM file...');\n        var romUrl = ${romUrlJs};\n        console.log('[EmuHTML] ROM file URI:', romUrl);\n        window.EJS_gameUrl = romUrl;\n        updateStatus('Loading Emulator', 'Loading core files...');`
+  );
 }

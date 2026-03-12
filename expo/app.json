@@ -22,6 +22,7 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
+      "usesCleartextTraffic": true,
       "package": "app.rork.bdz76lwrkslm8z9qas7bm"
     },
     "web": {
@@ -35,7 +36,8 @@
         }
       ],
       "expo-font",
-      "expo-web-browser"
+      "expo-web-browser",
+      "./plugins/withLibretroView.js"
     ],
     "experiments": {
       "typedRoutes": true
