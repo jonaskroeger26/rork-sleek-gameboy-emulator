@@ -1,7 +1,7 @@
 {
   "apps": [
     {
-      "name": "RetroPlay",
+      "name": "RetryX",
       "path": "expo",
       "framework": "react-native"
     }

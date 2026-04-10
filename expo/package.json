@@ -10,6 +10,7 @@
     "start-web-dev": "DEBUG=expo* bunx rork start -p bdz76lwrkslm8z9qas7bm --web --tunnel",
     "lint": "expo lint",
     "build:apk": "eas build --platform android --profile preview --non-interactive",
+    "build:dapp-store": "eas build --platform android --profile dapp-store",
     "android": "expo run:android",
     "ios": "expo run:ios"
   },
